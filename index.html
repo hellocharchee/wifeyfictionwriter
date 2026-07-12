@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wifey Fiction Writer</title>
+    <title>Wifey</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -129,19 +129,19 @@
         <div class="absolute top-1/2 left-3/4 w-[500px] h-[500px] bg-amber-600/20 rounded-full blur-[100px] animate-breathe" style="animation-delay: -4s;"></div>
         
         <div class="z-10 flex flex-col items-center text-center px-4 max-w-2xl animate-float">
-            <div class="bg-[#5c341e]/40 backdrop-blur-md border border-[#8a4e2d] p-6 rounded-3xl mb-8 shadow-2xl">
-                <i class="ph ph-heart text-orange-400 drop-shadow-[0_0_15px_rgba(251,146,60,0.6)]" style="font-size: 56px;"></i>
+            <div class="bg-[#5c341e]/40 backdrop-blur-md border border-[#8a4e2d] p-6 rounded-3xl mb-8 shadow-2xl flex items-center justify-center">
+                <i class="ph-fill ph-heart text-5xl text-orange-400 drop-shadow-[0_0_15px_rgba(251,146,60,0.8)]"></i>
             </div>
             
             <h1 class="mb-12 flex flex-col items-center">
-                <span class="text-7xl md:text-9xl bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-300 to-rose-400 bg-gradient-pan drop-shadow-sm fix-cursive-clip" style="font-family: 'Pacifico', cursive; line-height: 1.5;">
+                <span class="text-7xl md:text-9xl bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-300 to-rose-400 bg-gradient-pan drop-shadow-sm fix-cursive-clip pb-6 block" style="font-family: 'Pacifico', cursive; line-height: 1.5; padding-bottom: 24px;">
                     Wifey
                 </span>
             </h1>
             
             <button id="btn-start" class="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#e76f51] text-white font-bold rounded-full text-lg transition-all duration-300 hover:scale-105 hover:bg-[#f4a261] hover:text-[#2b1810] hover:shadow-[0_0_40px_rgba(231,111,81,0.5)] active:scale-95 overflow-hidden border border-[#f4a261]/50">
                 <span class="relative z-10 flex items-center gap-2">
-                    Enter Canvas
+                    Start Writing
                     <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                 </span>
                 <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent group-hover:animate-[shimmer_1.5s_infinite]"></div>
@@ -155,12 +155,12 @@
         <!-- Header -->
         <header class="flex items-center justify-between p-4 bg-neutral-900/80 backdrop-blur-md border-b border-neutral-800 shrink-0 z-20 transition-colors duration-500" id="main-header">
             <div class="flex items-center gap-3">
-                <i class="ph ph-heart text-orange-400 text-2xl"></i>
-                <h1 class="text-xl font-bold tracking-tight text-white hidden md:block">Wifey</h1>
+                <i class="ph-fill ph-heart text-orange-400 text-2xl drop-shadow-[0_0_5px_rgba(251,146,60,0.8)]"></i>
+                <h1 class="text-xl font-bold tracking-tight text-white hidden md:block" style="font-family: 'Pacifico', cursive;">Wifey</h1>
             </div>
             <div class="flex items-center gap-2 md:gap-4">
                 
-                <!-- Places Focus Knob (Hidden by default) -->
+                <!-- Places Focus Knob & Zoom (Hidden by default) -->
                 <div id="places-controls" class="hidden items-center gap-2 bg-neutral-950/60 px-3 py-1.5 rounded-full border border-neutral-700 backdrop-blur-sm mr-2 transition-all duration-300">
                     <button id="btn-places-shuffle" class="text-neutral-400 hover:text-white transition-colors flex items-center justify-center p-1" title="Randomize Place">
                         <i class="ph ph-shuffle text-lg"></i>
@@ -247,13 +247,13 @@
                     <!-- Cover Slide View -->
                     <div id="cover-view" class="w-full h-full flex flex-col items-center justify-center relative bg-neutral-900/80">
                         <img id="cover-image-preview" src="" alt="Cover" class="hidden w-full h-full object-cover">
-                        <label title="Upload Book Cover - Ideal dimensions: 1080 x 1350px (4:5). Supported files: JPG, PNG" id="cover-upload-label" class="cursor-pointer flex flex-col items-center justify-center gap-4 w-full h-full hover:bg-white/5 transition-colors border-2 border-dashed border-neutral-700 hover:border-blue-500 p-8 text-center absolute inset-0">
+                        <label title="Upload Book Cover - Supported files: JPG, PNG. Dimensions: 1080 x 1350px exactly" id="cover-upload-label" class="cursor-pointer flex flex-col items-center justify-center gap-4 w-full h-full hover:bg-white/5 transition-colors border-2 border-dashed border-neutral-700 hover:border-blue-500 p-8 text-center absolute inset-0">
                             <div class="p-4 bg-neutral-800 rounded-full text-blue-400">
                                 <i class="ph ph-image text-4xl"></i>
                             </div>
                             <div>
                                 <p class="font-bold text-lg mb-1">Upload Book Cover</p>
-                                <p class="text-xs text-neutral-400 bg-neutral-800 px-4 py-1.5 rounded-full inline-block mt-2">4:5 Ratio (1080 x 1350px) • JPG or PNG</p>
+                                <p class="text-xs text-neutral-400 bg-neutral-800 px-4 py-1.5 rounded-full inline-block mt-2">4:5 Ratio • JPG/PNG • 1080 x 1350px exactly</p>
                             </div>
                             <input type="file" id="cover-upload-input" accept="image/jpeg, image/png" class="hidden">
                         </label>
@@ -274,7 +274,8 @@
                 
                 <!-- Character Count Stats -->
                 <div class="text-xs text-neutral-400 flex flex-col items-center md:items-end w-48">
-                    <span id="char-count" class="font-bold text-neutral-200 transition-colors">0 / 800 Chars</span>
+                    <!-- CRITICAL: Initial HTML load now correctly says 1200 -->
+                    <span id="char-count" class="font-bold text-neutral-200 transition-colors">0 / 1200 Chars</span>
                     <span class="opacity-70 text-blue-400 font-medium">Current Slide Capacity</span>
                 </div>
 
@@ -341,7 +342,8 @@
     <script>
         // State Constants
         const MAX_PAGES = 20;
-        const MAX_CHARS = 800;
+        // CRITICAL: Ensure Javascript logic triggers correctly at 1200 limit
+        const MAX_CHARS = 1200;
         let pages = ['', '']; 
         let activePageIndex = 0;
         let coverImage = null;
@@ -603,7 +605,7 @@
             // Block if character limit reached
             if (editor.textContent.length >= MAX_CHARS) {
                 e.preventDefault();
-                showToast(`800 Character limit reached.`);
+                showToast(`${MAX_CHARS} Character limit reached.`);
                 return;
             }
 
@@ -762,7 +764,7 @@
                             exportContent.innerHTML = `
                                 <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; color:#525252; background:#1a1a1a;">
                                     <h1 style="font-size: 4rem; margin-bottom: 1rem; color: #60a5fa;">Upload a Book Cover</h1>
-                                    <p style="font-size: 2rem;">Dimensions: 1080 x 1350px (4:5)</p>
+                                    <p style="font-size: 2rem;">Dimensions: 1080 x 1350px exactly</p>
                                 </div>
                             `;
                             exportContent.style.padding = '80px';

@@ -46,6 +46,16 @@
             animation: gradientPan 8s ease infinite;
         }
 
+        /* 
+         * CRITICAL FIX: The Cursive Gradient Guillotine
+         * Adding a transparent text shadow forces webkit to recalculate 
+         * the clipping bounding box, preventing cursive loops from being chopped off!
+         */
+        .fix-cursive-clip {
+            text-shadow: 0px 10px 10px rgba(0,0,0,0.01);
+            padding-bottom: 20px;
+        }
+
         /* --- THE IMPENETRABLE WALL ENGINE --- */
         .ig-editor { font-family: 'Inter', sans-serif; }
         .ig-editor[data-placeholder]:empty:before {
@@ -123,16 +133,11 @@
                 <i class="ph ph-heart text-orange-400 drop-shadow-[0_0_15px_rgba(251,146,60,0.6)]" style="font-size: 56px;"></i>
             </div>
             
-            <h1 class="mb-6 leading-tight">
-                <span class="text-7xl md:text-9xl bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-300 to-rose-400 bg-gradient-pan drop-shadow-sm pb-6 block" style="font-family: 'Pacifico', cursive; padding-bottom: 24px;">
+            <h1 class="mb-12 flex flex-col items-center">
+                <span class="text-7xl md:text-9xl bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-300 to-rose-400 bg-gradient-pan drop-shadow-sm fix-cursive-clip" style="font-family: 'Pacifico', cursive; line-height: 1.5;">
                     Wifey
                 </span>
-                <span class="text-orange-50/90 text-3xl md:text-4xl font-sans font-bold tracking-tight">Fiction Writer</span>
             </h1>
-            
-            <p class="text-orange-200/80 text-lg md:text-xl mb-12 max-w-lg leading-relaxed font-light">
-                Craft beautiful, aesthetic carousels for Instagram. Format sentence-by-sentence, mix custom fonts, and perfectly frame your story.
-            </p>
             
             <button id="btn-start" class="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#e76f51] text-white font-bold rounded-full text-lg transition-all duration-300 hover:scale-105 hover:bg-[#f4a261] hover:text-[#2b1810] hover:shadow-[0_0_40px_rgba(231,111,81,0.5)] active:scale-95 overflow-hidden border border-[#f4a261]/50">
                 <span class="relative z-10 flex items-center gap-2">

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WeighAwesome Fiction Writer</title>
+    <title>Wifey Fiction Writer</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,6 +12,7 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@400;500;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     
     <!-- html2canvas and JSZip for Exporting -->
@@ -19,7 +20,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <style>
-        /* Custom Animations for the "Alive" Splash Screen */
+        /* Custom Animations for Splash Screen */
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-15px); }
@@ -39,13 +40,13 @@
         }
         
         .animate-float { animation: float 6s ease-in-out infinite; }
-        .animate-breathe { animation: breathe 8s ease-in-out infinite; transform-origin: top left; }
+        .animate-breathe { animation: breathe 10s ease-in-out infinite; transform-origin: top left; }
         .bg-gradient-pan {
             background-size: 200% 200%;
             animation: gradientPan 8s ease infinite;
         }
 
-        /* The Impenetrable Editor Styles */
+        /* --- THE IMPENETRABLE WALL ENGINE --- */
         .ig-editor { font-family: 'Inter', sans-serif; }
         .ig-editor[data-placeholder]:empty:before {
             content: attr(data-placeholder);
@@ -53,25 +54,30 @@
             cursor: text;
         }
         
-        /* Font Size Definitions */
-        .ig-editor font[size="7"] { font-size: 2.5rem; line-height: 1.1; font-weight: bold; display: block; margin-bottom: 0.5em; }
-        .ig-editor font[size="6"] { font-size: 2rem; line-height: 1.2; font-weight: bold; display: block; margin-bottom: 0.5em; }
-        .ig-editor font[size="5"] { font-size: 1.5rem; line-height: 1.3; font-weight: bold; display: block; margin-bottom: 0.5em; }
-        .ig-editor font[size="4"] { font-size: 1.25rem; line-height: 1.4; font-weight: 500; display: block; margin-bottom: 0.5em; }
+        /* Font size mappings */
+        .ig-editor font[size="7"] { font-size: 2.5rem; line-height: 1.1; font-weight: bold; }
+        .ig-editor font[size="6"] { font-size: 2rem; line-height: 1.2; font-weight: bold; }
+        .ig-editor font[size="5"] { font-size: 1.5rem; line-height: 1.3; font-weight: bold; }
+        .ig-editor font[size="4"] { font-size: 1.25rem; line-height: 1.4; font-weight: 500; }
         .ig-editor font[size="3"] { font-size: 1rem; line-height: 1.5; }
         .ig-editor font[size="2"] { font-size: 0.875rem; line-height: 1.5; }
         .ig-editor font[size="1"] { font-size: 0.75rem; line-height: 1.5; }
-        .ig-editor p, .ig-editor div { margin-bottom: 0.75em; }
+        
+        /* Strict element control inside the canvas */
+        .ig-editor p, .ig-editor div { margin-bottom: 0.75em; max-width: 100% !important; }
         .ig-editor:focus { outline: none; }
         
-        /* THE ULTIMATE PHYSICAL WALL: Permanently kills scrollbars and forces wrapping */
-        .ig-editor::-webkit-scrollbar {
-            display: none !important;
-        }
+        /* 
+         * CRITICAL FIX: The Scrollbar Assassin & Rigid Layout
+         * This forces text to wrap and permanently hides overflow.
+         */
+        .ig-editor::-webkit-scrollbar { display: none !important; }
         .ig-editor {
             -ms-overflow-style: none !important;
             scrollbar-width: none !important;
-            overflow: hidden !important; /* Physically prevents rendering outside bounds */
+            overflow: hidden !important; 
+            overflow-x: hidden !important;
+            overflow-y: hidden !important;
             overflow-wrap: anywhere !important;
             word-wrap: break-word !important;
             word-break: break-word !important;
@@ -82,84 +88,111 @@
             word-wrap: break-word !important;
         }
 
-        /* Export Container (Hidden normally) */
+        /* Export Container (Hidden) */
         #export-container {
             position: fixed;
-            top: -9999px;
-            left: -9999px;
-            width: 1080px;
-            height: 1350px;
+            top: -9999px; left: -9999px;
+            width: 1080px; height: 1350px;
             z-index: -1;
             overflow: hidden !important; 
         }
         .export-content {
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             padding: 80px; 
             font-size: 2.5rem; 
         }
     </style>
 </head>
-<body class="bg-neutral-950 text-white font-sans w-full h-screen flex flex-col overflow-hidden">
+<body class="bg-neutral-950 text-white font-sans w-full h-screen flex flex-col overflow-hidden relative">
+
+    <!-- PLACES MODE BACKGROUND -->
+    <div id="places-bg-container" class="fixed inset-0 z-0 opacity-0 pointer-events-none transition-opacity duration-1000">
+        <!-- Scale-110 prevents edge bleeding when heavily blurred -->
+        <div id="places-bg" class="absolute inset-0 bg-cover bg-center scale-110 transition-all duration-300" style="background-image: url('https://i.imgur.com/5UFzerv.jpeg'); filter: blur(8px);"></div>
+        <!-- Dark overlay to ensure UI contrast -->
+        <div class="absolute inset-0 bg-black/50"></div>
+    </div>
 
     <!-- SPLASH SCREEN -->
-    <div id="splash-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-neutral-950 overflow-hidden transition-opacity duration-700">
-        <!-- Breathing Background Orbs -->
-        <div class="absolute top-1/2 left-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] animate-breathe"></div>
-        <div class="absolute top-1/2 left-3/4 w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[100px] animate-breathe" style="animation-delay: -4s;"></div>
+    <div id="splash-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-[#3b2314] to-[#1a0f09] overflow-hidden transition-opacity duration-700">
+        <div class="absolute top-1/2 left-1/4 w-[500px] h-[500px] bg-orange-600/20 rounded-full blur-[100px] animate-breathe"></div>
+        <div class="absolute top-1/2 left-3/4 w-[500px] h-[500px] bg-amber-600/20 rounded-full blur-[100px] animate-breathe" style="animation-delay: -4s;"></div>
         
         <div class="z-10 flex flex-col items-center text-center px-4 max-w-2xl animate-float">
-            <!-- Icon: Feather Pen -->
-            <div class="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 p-6 rounded-3xl mb-8 shadow-2xl">
-                <i class="ph ph-feather text-blue-400 drop-shadow-[0_0_15px_rgba(96,165,250,0.5)]" style="font-size: 56px;"></i>
+            <div class="bg-[#5c341e]/40 backdrop-blur-md border border-[#8a4e2d] p-6 rounded-3xl mb-8 shadow-2xl">
+                <i class="ph ph-heart text-orange-400 drop-shadow-[0_0_15px_rgba(251,146,60,0.6)]" style="font-size: 56px;"></i>
             </div>
             
-            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
-                <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 bg-gradient-pan drop-shadow-sm">
-                    WeighAwesome
+            <h1 class="mb-6 leading-tight">
+                <span class="text-7xl md:text-9xl bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-300 to-rose-400 bg-gradient-pan drop-shadow-sm pb-6 block" style="font-family: 'Pacifico', cursive; padding-bottom: 24px;">
+                    Wifey
                 </span>
-                <br />
-                <span class="text-white/90">Fiction Writer</span>
+                <span class="text-orange-50/90 text-3xl md:text-4xl font-sans font-bold tracking-tight">Fiction Writer</span>
             </h1>
             
-            <p class="text-neutral-400 text-lg md:text-xl mb-12 max-w-lg leading-relaxed font-light">
+            <p class="text-orange-200/80 text-lg md:text-xl mb-12 max-w-lg leading-relaxed font-light">
                 Craft beautiful, aesthetic carousels for Instagram. Format sentence-by-sentence, mix custom fonts, and perfectly frame your story.
             </p>
             
-            <button id="btn-start" class="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-white text-black font-bold rounded-full text-lg transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.3)] active:scale-95 overflow-hidden">
+            <button id="btn-start" class="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#e76f51] text-white font-bold rounded-full text-lg transition-all duration-300 hover:scale-105 hover:bg-[#f4a261] hover:text-[#2b1810] hover:shadow-[0_0_40px_rgba(231,111,81,0.5)] active:scale-95 overflow-hidden border border-[#f4a261]/50">
                 <span class="relative z-10 flex items-center gap-2">
                     Enter Canvas
                     <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                 </span>
-                <!-- Button Shimmer Effect -->
-                <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-black/10 to-transparent group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent group-hover:animate-[shimmer_1.5s_infinite]"></div>
             </button>
         </div>
     </div>
 
     <!-- MAIN APP WRAPPER -->
-    <div id="main-app" class="hidden flex-col h-full w-full">
+    <div id="main-app" class="hidden flex-col h-full w-full relative z-10">
+        
         <!-- Header -->
-        <header class="flex items-center justify-between p-4 bg-neutral-900 border-b border-neutral-800 shrink-0">
+        <header class="flex items-center justify-between p-4 bg-neutral-900/80 backdrop-blur-md border-b border-neutral-800 shrink-0 z-20 transition-colors duration-500" id="main-header">
             <div class="flex items-center gap-3">
-                <i class="ph ph-feather text-blue-500 text-2xl"></i>
-                <h1 class="text-xl font-bold tracking-tight text-white">WeighAwesome</h1>
+                <i class="ph ph-heart text-orange-400 text-2xl"></i>
+                <h1 class="text-xl font-bold tracking-tight text-white hidden md:block">Wifey</h1>
             </div>
-            <div class="flex items-center gap-4">
-                <button id="btn-theme" class="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
-                    <i class="ph ph-sun text-lg"></i> Toggle Theme
+            <div class="flex items-center gap-2 md:gap-4">
+                
+                <!-- Places Focus Knob (Hidden by default) -->
+                <div id="places-controls" class="hidden items-center gap-2 bg-neutral-950/60 px-3 py-1.5 rounded-full border border-neutral-700 backdrop-blur-sm mr-2 transition-all duration-300">
+                    <button id="btn-places-shuffle" class="text-neutral-400 hover:text-white transition-colors flex items-center justify-center p-1" title="Randomize Place">
+                        <i class="ph ph-shuffle text-lg"></i>
+                    </button>
+                    <div class="w-px h-5 bg-neutral-700 mx-1"></div>
+                    <i class="ph ph-aperture text-neutral-400" title="Focus Knob"></i>
+                    <input type="range" id="focus-slider" min="0" max="20" value="8" class="w-16 md:w-20 accent-blue-500 cursor-pointer" title="Adjust Background Blur">
+                    <div class="w-px h-5 bg-neutral-700 mx-1"></div>
+                    <i class="ph ph-magnifying-glass-plus text-neutral-400" title="Zoom Knob"></i>
+                    <input type="range" id="zoom-slider" min="100" max="150" value="110" class="w-16 md:w-20 accent-blue-500 cursor-pointer" title="Adjust Background Zoom">
+                </div>
+                
+                <button id="btn-places" class="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
+                    <i class="ph ph-image text-lg"></i> <span class="hidden md:inline">Places</span>
                 </button>
-                <button id="btn-export" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-                    <i class="ph ph-download-simple text-lg"></i> Export Slides (ZIP)
+                
+                <div class="w-px h-6 bg-neutral-700 mx-1"></div>
+                
+                <button id="btn-theme" class="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
+                    <i class="ph ph-sun text-lg"></i> <span class="hidden md:inline">Theme</span>
+                </button>
+                
+                <button id="btn-dictionary" class="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors ml-2">
+                    <i class="ph ph-book-open-text text-lg"></i> <span class="hidden md:inline">Dictionary</span>
+                </button>
+
+                <button id="btn-export" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3 md:px-4 py-2 rounded-lg font-medium transition-colors ml-2">
+                    <i class="ph ph-download-simple text-lg"></i> <span class="hidden md:inline">Export (ZIP)</span>
                 </button>
             </div>
         </header>
 
         <!-- Main Content Area -->
-        <main class="flex-1 flex flex-col items-center py-6 px-4 gap-6 overflow-y-auto relative">
+        <main class="flex-1 flex flex-col items-center py-6 px-4 gap-6 overflow-y-auto relative z-10">
             
             <!-- Floating Toolbar -->
-            <div id="toolbar" class="hidden flex-wrap items-center gap-1 p-2 bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl sticky top-2 z-20 transition-opacity">
+            <div id="toolbar" class="hidden flex-wrap items-center justify-center gap-1 p-2 bg-neutral-900/95 backdrop-blur border border-neutral-700 rounded-xl shadow-2xl sticky top-2 z-30 transition-all duration-500 max-w-full">
                 <!-- Fonts Dropdown -->
                 <div class="relative">
                     <button id="btn-font-menu" onmousedown="event.preventDefault()" class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white rounded-lg transition-colors border border-neutral-700 bg-neutral-950">
@@ -203,13 +236,13 @@
             </div>
 
             <!-- Canvas Area (4:5 Aspect Ratio for IG) -->
-            <div class="relative w-full max-w-[400px] flex-shrink-0 group">
-                <div id="canvas-container" class="w-full aspect-[4/5] rounded-lg overflow-hidden flex flex-col transition-colors duration-300 bg-[#121212] text-white shadow-2xl relative border border-neutral-800">
+            <div class="relative w-full max-w-[400px] flex-shrink-0 group z-10 mt-2">
+                <div id="canvas-container" class="w-full aspect-[4/5] rounded-lg overflow-hidden flex flex-col transition-all duration-700 bg-[#121212] text-white shadow-2xl relative border border-neutral-800">
                     
                     <!-- Cover Slide View -->
-                    <div id="cover-view" class="w-full h-full flex flex-col items-center justify-center relative">
+                    <div id="cover-view" class="w-full h-full flex flex-col items-center justify-center relative bg-neutral-900/80">
                         <img id="cover-image-preview" src="" alt="Cover" class="hidden w-full h-full object-cover">
-                        <label title="Upload Book Cover - Ideal dimensions: 1080 x 1350px (4:5). Supported files: JPG, PNG" id="cover-upload-label" class="cursor-pointer flex flex-col items-center justify-center gap-4 w-full h-full hover:bg-white/5 transition-colors border-2 border-dashed border-neutral-700 hover:border-blue-500 p-8 text-center absolute inset-0 bg-neutral-900/80">
+                        <label title="Upload Book Cover - Ideal dimensions: 1080 x 1350px (4:5). Supported files: JPG, PNG" id="cover-upload-label" class="cursor-pointer flex flex-col items-center justify-center gap-4 w-full h-full hover:bg-white/5 transition-colors border-2 border-dashed border-neutral-700 hover:border-blue-500 p-8 text-center absolute inset-0">
                             <div class="p-4 bg-neutral-800 rounded-full text-blue-400">
                                 <i class="ph ph-image text-4xl"></i>
                             </div>
@@ -224,15 +257,14 @@
                     <!-- Text Editor View -->
                     <div id="text-view" class="hidden w-full h-full p-8 relative overflow-hidden">
                         <!-- THE IMPENETRABLE CANVAS -->
-                        <div id="editor" contenteditable="true" data-placeholder="Start typing your story here..." class="ig-editor w-full h-full outline-none whitespace-pre-wrap break-words" style="max-height: 100%;"></div>
+                        <div id="editor" contenteditable="true" data-placeholder="Start typing your story here..." class="ig-editor w-full h-full outline-none whitespace-pre-wrap break-words"></div>
                     </div>
-
                 </div>
             </div>
         </main>
 
         <!-- Footer Navigation & Stats -->
-        <footer class="bg-neutral-900 border-t border-neutral-800 p-4 shrink-0 flex flex-col items-center gap-4">
+        <footer class="bg-neutral-900/80 backdrop-blur-md border-t border-neutral-800 p-4 shrink-0 flex flex-col items-center gap-4 z-20 transition-colors duration-500" id="main-footer">
             <div class="flex flex-col md:flex-row items-center gap-6">
                 
                 <!-- Character Count Stats -->
@@ -242,12 +274,12 @@
                 </div>
 
                 <!-- Navigation Pill -->
-                <div class="flex items-center gap-4 bg-neutral-950 p-2 rounded-full border border-neutral-800 shadow-inner">
+                <div class="flex items-center gap-2 md:gap-4 bg-neutral-950 p-2 rounded-full border border-neutral-800 shadow-inner">
                     <button id="btn-prev" class="p-2 text-neutral-400 hover:text-white disabled:opacity-30 disabled:hover:text-neutral-400 transition-colors">
                         <i class="ph ph-caret-left text-xl"></i>
                     </button>
                     
-                    <span id="page-indicator" class="text-sm font-medium w-32 text-center text-white">Cover Slide</span>
+                    <span id="page-indicator" class="text-sm font-medium w-24 md:w-32 text-center text-white">Cover Slide</span>
                     
                     <button id="btn-next" class="p-2 text-neutral-400 hover:text-white disabled:opacity-30 disabled:hover:text-neutral-400 transition-colors">
                         <i class="ph ph-caret-right text-xl"></i>
@@ -255,8 +287,8 @@
 
                     <div class="w-px h-6 bg-neutral-700 mx-1"></div>
 
-                    <button id="btn-add" class="p-2 text-blue-400 hover:text-blue-300 disabled:opacity-30 disabled:hover:text-blue-400 transition-colors flex items-center gap-1 text-sm font-medium pr-4">
-                        <i class="ph ph-plus text-lg"></i> New Slide
+                    <button id="btn-add" class="p-2 text-blue-400 hover:text-blue-300 disabled:opacity-30 disabled:hover:text-blue-400 transition-colors flex items-center gap-1 text-sm font-medium pr-2 md:pr-4">
+                        <i class="ph ph-plus text-lg"></i> <span class="hidden md:inline">New Slide</span>
                     </button>
                 </div>
 
@@ -269,6 +301,26 @@
         </footer>
     </div>
 
+    <!-- DICTIONARY PANEL -->
+    <div id="dictionary-panel" class="fixed inset-y-0 right-0 w-full sm:w-96 bg-neutral-950/95 backdrop-blur-2xl border-l border-neutral-800 shadow-2xl transform translate-x-full transition-transform duration-500 z-50 flex flex-col">
+        <div class="flex items-center justify-between p-4 border-b border-neutral-800">
+            <h2 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph ph-book-open-text text-blue-400"></i> Dictionary</h2>
+            <button id="btn-close-dict" class="text-neutral-400 hover:text-white transition-colors p-1"><i class="ph ph-x text-xl"></i></button>
+        </div>
+        <div class="p-4 border-b border-neutral-800">
+            <div class="relative">
+                <input type="text" id="dict-search-input" placeholder="Search for a word... (Press Enter)" class="w-full bg-neutral-900 border border-neutral-700 text-white rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:border-blue-500 transition-colors shadow-inner">
+                <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-lg"></i>
+            </div>
+        </div>
+        <div id="dict-results" class="flex-1 overflow-y-auto p-5 flex flex-col gap-6 custom-scrollbar">
+            <div class="text-center text-neutral-500 mt-10">
+                <i class="ph ph-books text-5xl mb-3 opacity-30"></i>
+                <p>Type a word above and press Enter to search.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Hidden Export Container -->
     <div id="export-container">
         <div id="export-canvas" class="w-full h-full bg-[#121212] text-white overflow-hidden relative">
@@ -277,18 +329,19 @@
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg text-sm font-medium transition-all duration-300 transform translate-y-20 opacity-0 z-50 flex items-center gap-2 pointer-events-none">
-        <i class="ph ph-info text-lg"></i> <span id="toast-msg"></span>
+    <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg text-sm font-medium transition-all duration-300 transform translate-y-20 opacity-0 z-50 flex items-center gap-2 pointer-events-none text-center">
+        <i class="ph ph-info text-lg shrink-0"></i> <span id="toast-msg"></span>
     </div>
 
     <script>
-        // State
+        // State Constants
         const MAX_PAGES = 20;
-        const MAX_CHARS_PER_SLIDE = 800; // Guideline wall
-        let pages = ['', '']; // [Cover, TextSlide1]
+        const MAX_CHARS = 800;
+        let pages = ['', '']; 
         let activePageIndex = 0;
         let coverImage = null;
         let theme = 'dark';
+        let placesModeActive = false;
 
         // DOM Elements
         const splashScreen = document.getElementById('splash-screen');
@@ -316,6 +369,42 @@
         const btnExport = document.getElementById('btn-export');
         const charCountDisplay = document.getElementById('char-count');
         const toast = document.getElementById('toast');
+        
+        // Places Elements
+        const btnPlaces = document.getElementById('btn-places');
+        const placesBgContainer = document.getElementById('places-bg-container');
+        const placesBg = document.getElementById('places-bg');
+        const placesControls = document.getElementById('places-controls');
+        const focusSlider = document.getElementById('focus-slider');
+        const zoomSlider = document.getElementById('zoom-slider');
+        const btnPlacesShuffle = document.getElementById('btn-places-shuffle');
+
+        // Image Database
+        const placesImages = [
+            "https://i.imgur.com/5UFzerv.jpeg", "https://i.imgur.com/XCuiczb.jpeg", "https://i.imgur.com/6uJQCOC.jpeg",
+            "https://i.imgur.com/anqxLvU.jpeg", "https://i.imgur.com/UMnOm10.jpeg", "https://i.imgur.com/m0j7Wod.jpeg",
+            "https://i.imgur.com/b8luyYO.jpeg", "https://i.imgur.com/TS3gCt0.jpeg", "https://i.imgur.com/BvNeLdX.jpeg",
+            "https://i.imgur.com/gCLKBFY.jpeg", "https://i.imgur.com/Z7rH1yo.jpeg", "https://i.imgur.com/4xDDv8G.jpeg",
+            "https://i.imgur.com/9cpY120.jpeg", "https://i.imgur.com/tcoSjQS.jpeg", "https://i.imgur.com/w4upd7r.jpeg",
+            "https://i.imgur.com/L8L2Qgq.jpeg", "https://i.imgur.com/aaZsHiU.jpeg", "https://i.imgur.com/0dyCGpL.jpeg",
+            "https://i.imgur.com/LKChhgP.jpeg", "https://i.imgur.com/UH3ewoE.jpeg", "https://i.imgur.com/qgbilCS.jpeg",
+            "https://i.imgur.com/ghYWPGI.jpeg", "https://i.imgur.com/DcF0oCT.jpeg", "https://i.imgur.com/D5uBRSH.jpeg",
+            "https://i.imgur.com/z09OJM5.jpeg", "https://i.imgur.com/4yISnZI.jpeg", "https://i.imgur.com/AP3n0uB.jpeg",
+            "https://i.imgur.com/vGcEYFg.jpeg", "https://i.imgur.com/Hxyaqh6.jpeg", "https://i.imgur.com/14kdJzU.jpeg",
+            "https://i.imgur.com/JyL9pmf.jpeg", "https://i.imgur.com/2vf3FY9.jpeg", "https://i.imgur.com/Epyew5w.jpeg",
+            "https://i.imgur.com/p1RiYe2.jpeg", "https://i.imgur.com/Q7kfrqb.jpeg", "https://i.imgur.com/srNQGdx.jpeg",
+            "https://i.imgur.com/iCyebXV.jpeg", "https://i.imgur.com/IOWHZ34.jpeg", "https://i.imgur.com/fLjf3on.jpeg",
+            "https://i.imgur.com/6jKGMZ8.jpeg", "https://i.imgur.com/nH6uOT7.jpeg", "https://i.imgur.com/T1cav3v.jpeg",
+            "https://i.imgur.com/2wYJmoV.jpeg", "https://i.imgur.com/17zqJLm.jpeg", "https://i.imgur.com/nKzof8t.jpeg",
+            "https://i.imgur.com/HR4SjV2.jpeg", "https://i.imgur.com/7e5hJ4e.jpeg", "https://i.imgur.com/45gCpPk.jpeg",
+            "https://i.imgur.com/9oJYpvu.jpeg", "https://i.imgur.com/4p6QJBe.jpeg", "https://i.imgur.com/oxYMNQ8.jpeg",
+            "https://i.imgur.com/vVvgPrF.jpeg", "https://i.imgur.com/n0NU3wp.jpeg"
+        ];
+
+        function setRandomPlace() {
+            const randomIndex = Math.floor(Math.random() * placesImages.length);
+            placesBg.style.backgroundImage = `url('${placesImages[randomIndex]}')`;
+        }
 
         // Splash Screen
         btnStart.addEventListener('click', () => {
@@ -327,6 +416,185 @@
                 updateUI();
             }, 700);
         });
+
+        function showToast(msg) {
+            const toastMsg = document.getElementById('toast-msg');
+            toastMsg.textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0', 'bg-blue-600', 'bg-red-600', 'bg-emerald-600');
+            
+            if(msg.includes("limit") || msg.includes("full") || msg.includes("Boundary") || msg.includes("overflow")) {
+                toast.classList.add('bg-red-600');
+            } else {
+                toast.classList.add('bg-blue-600');
+            }
+            
+            setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 4000);
+        }
+
+        // Places Mode Logic
+        btnPlaces.addEventListener('click', () => {
+            placesModeActive = !placesModeActive;
+            if (placesModeActive) {
+                // Turn on Places
+                setRandomPlace();
+                placesBgContainer.classList.remove('opacity-0', 'pointer-events-none');
+                placesControls.classList.remove('hidden');
+                placesControls.classList.add('flex');
+                btnPlaces.classList.add('text-blue-400');
+                btnPlaces.classList.remove('text-neutral-400');
+            } else {
+                // Turn off Places
+                placesBgContainer.classList.add('opacity-0', 'pointer-events-none');
+                placesControls.classList.add('hidden');
+                placesControls.classList.remove('flex');
+                btnPlaces.classList.remove('text-blue-400');
+                btnPlaces.classList.add('text-neutral-400');
+            }
+        });
+
+        // Shuffle Button Logic
+        btnPlacesShuffle.addEventListener('click', () => {
+            placesBg.style.opacity = '0';
+            setTimeout(() => {
+                setRandomPlace();
+                placesBg.style.opacity = '1';
+            }, 300);
+        });
+
+        // Focus Slider Logic
+        focusSlider.addEventListener('input', (e) => {
+            placesBg.style.filter = `blur(${e.target.value}px)`;
+        });
+
+        // Zoom Slider Logic
+        zoomSlider.addEventListener('input', (e) => {
+            placesBg.style.transform = `scale(${e.target.value / 100})`;
+        });
+
+        let isReverting = false;
+
+        // Formatting Application (Blocks if it pushes text out of bounds)
+        function applyCommand(command, value = null) {
+            document.execCommand(command, false, value);
+            
+            // Physical Boundary Check
+            if (editor.scrollHeight > editor.clientHeight + 2 || editor.textContent.length > MAX_CHARS) {
+                document.execCommand('undo');
+                showToast("Formatting blocked: Text exceeds slide boundaries!");
+            } else {
+                saveContent();
+            }
+            editor.focus();
+        }
+
+        // 1. Paste Interceptor & Binary Search Truncation
+        editor.addEventListener('paste', (e) => {
+            e.preventDefault();
+            
+            let html = e.clipboardData.getData('text/html');
+            let text = e.clipboardData.getData('text/plain');
+            
+            // Scrub hidden Word/Google Docs styling and nasty non-breaking spaces
+            if (html) {
+                html = html.replace(/&nbsp;/g, ' ').replace(/\u00A0/g, ' '); 
+                let temp = document.createElement('div');
+                temp.innerHTML = html;
+                const elements = temp.querySelectorAll("*");
+                elements.forEach(el => {
+                    el.removeAttribute('style');
+                    el.removeAttribute('class');
+                    el.removeAttribute('id');
+                    el.removeAttribute('width');
+                    el.removeAttribute('height');
+                });
+                text = temp.textContent || temp.innerText || "";
+            } else {
+                text = text.replace(/\u00A0/g, ' ');
+            }
+            
+            isReverting = true; 
+            
+            let currentLen = editor.textContent.length;
+            let availableChars = MAX_CHARS - currentLen;
+            
+            if (availableChars <= 0) {
+                showToast("Slide is full. Paste on the next slide.");
+                isReverting = false;
+                return;
+            }
+
+            // Split into words to try and fit as many as possible
+            let words = text.split(/(\s+)/); 
+            let low = 0;
+            let high = words.length;
+            let bestFitIndex = 0;
+            
+            while (low <= high) {
+                let mid = Math.floor((low + high) / 2);
+                let attempt = words.slice(0, mid).join('');
+                
+                document.execCommand('insertText', false, attempt);
+                
+                // Check both Physical Height AND Character Limit
+                if (editor.scrollHeight <= editor.clientHeight + 2 && editor.textContent.length <= MAX_CHARS) {
+                    bestFitIndex = mid;
+                    low = mid + 1; 
+                } else {
+                    high = mid - 1; 
+                }
+                
+                document.execCommand('undo');
+            }
+            
+            // Final insertion of the words that successfully fit
+            let finalString = words.slice(0, bestFitIndex).join('');
+            document.execCommand('insertText', false, finalString);
+            
+            isReverting = false;
+            editor.dispatchEvent(new Event('input'));
+            
+            if (bestFitIndex < words.length) {
+                showToast(`Boundary hit! Copied ${finalString.length} chars. Paste remainder on next slide.`);
+            }
+        });
+
+        // 2. Typing Blocker (Hard Wall)
+        editor.addEventListener('keydown', (e) => {
+            // Allow backspace, delete, arrows, and shortcuts
+            if (e.key === 'Backspace' || e.key === 'Delete' || e.ctrlKey || e.metaKey || e.key.includes('Arrow')) return;
+            
+            // Block if character limit reached
+            if (editor.textContent.length >= MAX_CHARS) {
+                e.preventDefault();
+                showToast(`800 Character limit reached.`);
+                return;
+            }
+
+            // Block if physical bottom boundary reached
+            if (editor.scrollHeight > editor.clientHeight + 2) {
+                e.preventDefault();
+                showToast("Physical slide bottom reached.");
+            }
+        });
+
+        editor.addEventListener('input', (e) => {
+            if (isReverting) return; 
+            
+            // Failsafe rollback if somehow text bypassed the keydown event
+            if (editor.scrollHeight > editor.clientHeight + 2 || editor.textContent.length > MAX_CHARS) {
+                isReverting = true;
+                document.execCommand('undo'); 
+                showToast("Slide capacity reached.");
+                isReverting = false;
+            } else {
+                saveContent();
+                updateCharCount();
+            }
+        });
+
+        function saveContent() {
+            if (activePageIndex > 0) pages[activePageIndex] = editor.innerHTML;
+        }
 
         // Font Menu Logic
         fontMenuBtn.addEventListener('click', () => fontMenu.classList.toggle('hidden'));
@@ -340,119 +608,6 @@
         }
         function applySize(size) {
             applyCommand('fontSize', size);
-        }
-
-        function showToast(msg) {
-            const toastMsg = document.getElementById('toast-msg');
-            toastMsg.textContent = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0', 'bg-blue-600', 'bg-red-600');
-            
-            // Make error toasts red
-            if(msg.includes("Full") || msg.includes("boundary") || msg.includes("too large") || msg.includes("clipped")) {
-                toast.classList.add('bg-red-600');
-            } else {
-                toast.classList.add('bg-blue-600');
-            }
-            
-            setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 3500);
-        }
-
-        // --- THE IMPENETRABLE WALL ENGINE ---
-        
-        let isReverting = false;
-
-        // 1. The Format Safety Net
-        function applyCommand(command, value = null) {
-            document.execCommand(command, false, value);
-            
-            // If making it bold/bigger pushes it past the physical wall, undo it instantly.
-            if (editor.scrollHeight > editor.clientHeight + 2) {
-                document.execCommand('undo');
-                showToast("Formatting blocked: That makes the text too large to fit!");
-            } else {
-                saveContent();
-                updateCharCount();
-            }
-            editor.focus();
-        }
-
-        // 2. The Smart Binary Search Paste Engine
-        editor.addEventListener('paste', (e) => {
-            e.preventDefault();
-            
-            // Force plain text to strip Google Docs style garbage and keep formatting safe
-            let text = e.clipboardData.getData('text/plain');
-            text = text.replace(/\u00A0/g, ' '); // Destroy non-breaking spaces
-            
-            // Split text by whitespace, preserving the spaces themselves
-            let words = text.split(/(\s+)/); 
-            
-            isReverting = true; // Suspend typing guard while testing
-            
-            // Test 1: Dump everything in. Does it fit?
-            document.execCommand('insertText', false, text);
-            if (editor.scrollHeight <= editor.clientHeight + 2) {
-                isReverting = false;
-                editor.dispatchEvent(new Event('input')); // Save and update UI
-                return;
-            }
-            
-            // It overflowed. Undo the dump.
-            document.execCommand('undo');
-            
-            // Binary search to find the exact number of words that can physically fit
-            let low = 0;
-            let high = words.length;
-            let bestFitIndex = 0;
-            
-            while (low <= high) {
-                let mid = Math.floor((low + high) / 2);
-                let attempt = words.slice(0, mid).join('');
-                
-                document.execCommand('insertText', false, attempt);
-                
-                if (editor.scrollHeight <= editor.clientHeight + 2) {
-                    bestFitIndex = mid;
-                    low = mid + 1; // It fits, let's try stuffing more in
-                } else {
-                    high = mid - 1; // It overflowed, scale back
-                }
-                
-                document.execCommand('undo'); // Revert for the next clean test
-            }
-            
-            // We found the perfect fit. Insert it permanently.
-            let finalString = words.slice(0, bestFitIndex).join('');
-            document.execCommand('insertText', false, finalString);
-            
-            isReverting = false;
-            editor.dispatchEvent(new Event('input')); // Save
-            showToast("Slide filled completely! Remaining text was clipped.");
-        });
-
-        // 3. The Typing Safety Net
-        editor.addEventListener('input', (e) => {
-            if (isReverting) return; // Ignore events triggered by our paste engine
-            
-            // If the keystroke physically pushed the text out of bounds
-            if (editor.scrollHeight > editor.clientHeight + 2) {
-                isReverting = true;
-                document.execCommand('undo'); // Instantly delete the keystroke
-                showToast("Physical boundary reached! Cannot fit more text.");
-                isReverting = false;
-            } else if (editor.textContent.length > MAX_CHARS_PER_SLIDE) {
-                isReverting = true;
-                document.execCommand('undo');
-                showToast(`Character limit reached (${MAX_CHARS_PER_SLIDE})`);
-                isReverting = false;
-            } else {
-                saveContent();
-                updateCharCount();
-            }
-        });
-
-        function saveContent() {
-            if (activePageIndex > 0) pages[activePageIndex] = editor.innerHTML;
         }
 
         // Navigation Logic
@@ -515,7 +670,8 @@
                 textView.classList.add('hidden');
                 toolbar.classList.add('hidden');
                 deleteText.textContent = 'Remove Cover';
-                charCountDisplay.textContent = `0 / ${MAX_CHARS_PER_SLIDE} Chars`;
+                charCountDisplay.textContent = `0 / ${MAX_CHARS} Chars`;
+                charCountDisplay.className = 'font-bold text-neutral-200 transition-colors';
             } else {
                 pageIndicator.textContent = `Slide ${activePageIndex} of ${pages.length - 1}`;
                 coverView.classList.add('hidden');
@@ -535,8 +691,8 @@
         function updateCharCount() {
             if (activePageIndex === 0) return;
             const textLen = editor.textContent.length;
-            charCountDisplay.textContent = `${textLen} / ${MAX_CHARS_PER_SLIDE} Chars`;
-            charCountDisplay.className = textLen >= MAX_CHARS_PER_SLIDE 
+            charCountDisplay.textContent = `${textLen} / ${MAX_CHARS} Chars`;
+            charCountDisplay.className = textLen >= MAX_CHARS 
                 ? 'font-bold text-red-400 transition-colors' 
                 : 'font-bold text-neutral-200 transition-colors';
         }
@@ -567,8 +723,8 @@
                             exportContent.style.padding = '0';
                         } else {
                             exportContent.innerHTML = `
-                                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; color:#525252;">
-                                    <h1 style="font-size: 4rem; margin-bottom: 1rem;">Upload a Book Cover</h1>
+                                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; color:#525252; background:#1a1a1a;">
+                                    <h1 style="font-size: 4rem; margin-bottom: 1rem; color: #60a5fa;">Upload a Book Cover</h1>
                                     <p style="font-size: 2rem;">Dimensions: 1080 x 1350px (4:5)</p>
                                 </div>
                             `;
@@ -595,7 +751,7 @@
                 const zipContent = await zip.generateAsync({ type: 'blob' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(zipContent);
-                link.download = 'WeighAwesome_Story.zip';
+                link.download = 'Wifey_Story.zip';
                 link.click();
                 
                 showToast('Download complete! Unzip to post.');
@@ -607,6 +763,79 @@
                 btnExport.classList.remove('opacity-50');
             }
         });
+
+        // --- DICTIONARY LOGIC ---
+        const btnDictionary = document.getElementById('btn-dictionary');
+        const dictionaryPanel = document.getElementById('dictionary-panel');
+        const btnCloseDict = document.getElementById('btn-close-dict');
+        const dictSearchInput = document.getElementById('dict-search-input');
+        const dictResults = document.getElementById('dict-results');
+
+        btnDictionary.addEventListener('click', () => {
+            dictionaryPanel.classList.remove('translate-x-full');
+            setTimeout(() => dictSearchInput.focus(), 100);
+        });
+
+        btnCloseDict.addEventListener('click', () => {
+            dictionaryPanel.classList.add('translate-x-full');
+        });
+
+        dictSearchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const word = dictSearchInput.value.trim();
+                if (word) fetchDefinition(word);
+            }
+        });
+
+        async function fetchDefinition(word) {
+            dictResults.innerHTML = `<div class="text-center text-neutral-400 mt-10"><i class="ph ph-spinner animate-spin text-4xl mb-3 text-blue-500"></i><p>Searching the archives...</p></div>`;
+            
+            try {
+                const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                if (!response.ok) throw new Error('Word not found');
+                
+                const data = await response.json();
+                const entry = data[0];
+                
+                let html = `
+                    <div class="mb-2 border-b border-neutral-800 pb-4">
+                        <h3 class="text-3xl font-extrabold text-white tracking-tight">${entry.word}</h3>
+                        ${entry.phonetic ? `<p class="text-blue-400 font-medium text-lg mt-1">${entry.phonetic}</p>` : ''}
+                    </div>
+                `;
+                
+                entry.meanings.forEach(meaning => {
+                    html += `<div class="mb-4">
+                                <div class="inline-block px-2 py-1 bg-neutral-800 text-xs font-bold uppercase tracking-wider text-neutral-300 rounded mb-3">${meaning.partOfSpeech}</div>
+                                <ul class="list-disc pl-5 text-neutral-300 space-y-3">`;
+                    
+                    meaning.definitions.slice(0, 4).forEach(def => {
+                        html += `<li><span class="text-neutral-200">${def.definition}</span>`;
+                        if (def.example) html += `<br><span class="text-neutral-500 italic text-sm mt-1 block">"${def.example}"</span>`;
+                        html += `</li>`;
+                    });
+                    
+                    html += `</ul>`;
+                    
+                    if (meaning.synonyms && meaning.synonyms.length > 0) {
+                        html += `<div class="mt-4 text-sm bg-neutral-900 p-3 rounded-lg border border-neutral-800">
+                                    <span class="text-neutral-500 font-medium">Synonyms: </span>
+                                    <span class="text-blue-400">${meaning.synonyms.slice(0, 6).join(', ')}</span>
+                                 </div>`;
+                    }
+                    html += `</div>`;
+                });
+                
+                dictResults.innerHTML = html;
+            } catch (error) {
+                dictResults.innerHTML = `
+                    <div class="text-center text-neutral-500 mt-10">
+                        <i class="ph ph-warning-circle text-5xl mb-3 text-red-400 opacity-80"></i>
+                        <p>We couldn't find a definition for "<span class="text-white">${word}</span>".</p>
+                        <p class="text-sm mt-2 opacity-70">Check your spelling or try another word.</p>
+                    </div>`;
+            }
+        }
     </script>
 </body>
 </html>

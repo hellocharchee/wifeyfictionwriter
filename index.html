@@ -407,8 +407,40 @@
         ];
 
         function setRandomPlace() {
+            if (placesImages.length === 0) {
+                showToast("No valid images remaining!");
+                return;
+            }
+            
             const randomIndex = Math.floor(Math.random() * placesImages.length);
-            placesBg.style.backgroundImage = `url('${placesImages[randomIndex]}')`;
+            const imgUrl = placesImages[randomIndex];
+            
+            // Auto-Healing Engine: Test the image silently
+            const tempImg = new Image();
+            
+            tempImg.onload = () => {
+                // Imgur replaces deleted images with a tiny 161x81 "Removed" graphic.
+                // We check for that exact width to catch it!
+                if (tempImg.width === 161) {
+                    console.warn("Imgur deleted placeholder detected & removed: ", imgUrl);
+                    placesImages.splice(randomIndex, 1); // Delete the bad link
+                    setRandomPlace(); // Roll again immediately
+                    return;
+                }
+                
+                // If it loads normally, show it!
+                placesBg.style.backgroundImage = `url('${imgUrl}')`;
+                placesBg.style.opacity = '1';
+            };
+            
+            tempImg.onerror = () => {
+                // Catch hard 404 errors
+                console.warn("Broken link detected & removed: ", imgUrl);
+                placesImages.splice(randomIndex, 1);
+                setRandomPlace(); 
+            };
+            
+            tempImg.src = imgUrl;
         }
 
         // Splash Screen
@@ -441,6 +473,7 @@
             placesModeActive = !placesModeActive;
             if (placesModeActive) {
                 // Turn on Places
+                placesBg.style.opacity = '0'; // Prep for fade
                 setRandomPlace();
                 placesBgContainer.classList.remove('opacity-0', 'pointer-events-none');
                 placesControls.classList.remove('hidden');
@@ -462,7 +495,6 @@
             placesBg.style.opacity = '0';
             setTimeout(() => {
                 setRandomPlace();
-                placesBg.style.opacity = '1';
             }, 300);
         });
 

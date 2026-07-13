@@ -135,7 +135,7 @@
             
             <h1 class="mb-12 flex flex-col items-center">
                 <span class="text-7xl md:text-9xl bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-300 to-rose-400 bg-gradient-pan drop-shadow-sm fix-cursive-clip pb-6 block" style="font-family: 'Pacifico', cursive; line-height: 1.5; padding-bottom: 24px;">
-                    Wifey
+                    Wifey!
                 </span>
             </h1>
             
@@ -156,7 +156,7 @@
         <header class="flex items-center justify-between p-4 bg-neutral-900/80 backdrop-blur-md border-b border-neutral-800 shrink-0 z-20 transition-colors duration-500" id="main-header">
             <div class="flex items-center gap-3">
                 <i class="ph-fill ph-heart text-orange-400 text-2xl drop-shadow-[0_0_5px_rgba(251,146,60,0.8)]"></i>
-                <h1 class="text-xl font-bold tracking-tight text-white hidden md:block" style="font-family: 'Pacifico', cursive;">Wifey</h1>
+                <h1 class="text-xl font-bold tracking-tight text-white hidden md:block" style="font-family: 'Pacifico', cursive;">Wifey!</h1>
             </div>
             <div class="flex items-center gap-2 md:gap-4">
                 
@@ -185,6 +185,12 @@
                 
                 <button id="btn-dictionary" class="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors ml-2">
                     <i class="ph ph-book-open-text text-lg"></i> <span class="hidden md:inline">Dictionary</span>
+                </button>
+
+                <div class="w-px h-6 bg-neutral-700 mx-1 hidden md:block"></div>
+
+                <button id="btn-hardcore" class="flex items-center gap-2 text-sm text-rose-500 hover:text-rose-400 transition-colors" title="Coming Soon!">
+                    <i class="ph ph-lightning text-lg drop-shadow-[0_0_5px_rgba(244,63,94,0.5)]"></i> <span class="hidden md:inline font-semibold">Hardcore Mode</span>
                 </button>
 
                 <button id="btn-export" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3 md:px-4 py-2 rounded-lg font-medium transition-colors ml-2">
@@ -809,6 +815,12 @@
         const btnCloseDict = document.getElementById('btn-close-dict');
         const dictSearchInput = document.getElementById('dict-search-input');
         const dictResults = document.getElementById('dict-results');
+        const btnHardcore = document.getElementById('btn-hardcore');
+
+        // Hardcore Mode Coming Soon Toast
+        btnHardcore.addEventListener('click', () => {
+            showToast('⚡ Hardcore Mode is coming soon! Prepare yourself.');
+        });
 
         btnDictionary.addEventListener('click', () => {
             dictionaryPanel.classList.remove('translate-x-full');

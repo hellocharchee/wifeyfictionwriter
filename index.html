@@ -46,11 +46,30 @@
             animation: gradientPan 8s ease infinite;
         }
 
-        /* 
-         * CRITICAL FIX: The Cursive Gradient Guillotine
-         * Adding a transparent text shadow forces webkit to recalculate 
-         * the clipping bounding box, preventing cursive loops from being chopped off!
-         */
+        /* --- CLOUD PARALLAX ANIMATIONS --- */
+        @keyframes driftRight {
+            0% { transform: translateX(-120%); }
+            100% { transform: translateX(120vw); }
+        }
+        @keyframes driftLeft {
+            0% { transform: translateX(120vw); }
+            100% { transform: translateX(-120%); }
+        }
+        
+        .cloud {
+            position: absolute;
+            max-width: none;
+            will-change: transform;
+            /* Dims the clouds slightly for a stormy, moody vibe */
+            filter: brightness(0.75) contrast(1.1); 
+        }
+        
+        .animate-cloud-fast { animation: driftRight 45s linear infinite; }
+        .animate-cloud-med { animation: driftRight 70s linear infinite; }
+        .animate-cloud-med-slow { animation: driftLeft 90s linear infinite; }
+        .animate-cloud-slow { animation: driftRight 130s linear infinite; }
+
+        /* CRITICAL FIX: The Cursive Gradient Guillotine */
         .fix-cursive-clip {
             text-shadow: 0px 10px 10px rgba(0,0,0,0.01);
             padding-bottom: 20px;
@@ -77,10 +96,7 @@
         .ig-editor p, .ig-editor div { margin-bottom: 0.75em; max-width: 100% !important; }
         .ig-editor:focus { outline: none; }
         
-        /* 
-         * CRITICAL FIX: The Scrollbar Assassin & Rigid Layout
-         * This forces text to wrap and permanently hides overflow.
-         */
+        /* CRITICAL FIX: The Scrollbar Assassin & Rigid Layout */
         .ig-editor::-webkit-scrollbar { display: none !important; }
         .ig-editor {
             -ms-overflow-style: none !important;
@@ -117,10 +133,32 @@
 
     <!-- PLACES MODE BACKGROUND -->
     <div id="places-bg-container" class="fixed inset-0 z-0 opacity-0 pointer-events-none transition-opacity duration-1000">
-        <!-- Scale-110 prevents edge bleeding when heavily blurred -->
         <div id="places-bg" class="absolute inset-0 bg-cover bg-center scale-110 transition-all duration-300" style="background-image: url('https://i.imgur.com/5UFzerv.jpeg'); filter: blur(8px);"></div>
-        <!-- Dark overlay to ensure UI contrast -->
         <div class="absolute inset-0 bg-black/50"></div>
+    </div>
+
+    <!-- WEATHER CANVAS LAYER (Rain falls behind the foreground clouds) -->
+    <canvas id="weather-canvas" class="fixed inset-0 z-0 pointer-events-none opacity-0 transition-opacity duration-1000"></canvas>
+
+    <!-- CLOUDS PARALLAX LAYER -->
+    <div id="clouds-container" class="fixed inset-0 z-0 pointer-events-none opacity-0 transition-opacity duration-1000 overflow-hidden">
+        <!-- 6 - X Large (Foreground, moves fast) -->
+        <img src="https://i.postimg.cc/W4p8vFpr/6.png" class="cloud animate-cloud-fast w-[150vw] md:w-[130vw] top-[-15vh] opacity-90 left-0" style="animation-delay: -20s;" alt="Cloud">
+        
+        <!-- 1 - Large -->
+        <img src="https://i.postimg.cc/mrZjszZD/1.png" class="cloud animate-cloud-med w-[110vw] md:w-[90vw] top-[-5vh] opacity-80 left-0" style="animation-delay: -45s;" alt="Cloud">
+        
+        <!-- 2 - Medium (Drifting left to cross paths) -->
+        <img src="https://i.postimg.cc/mrZjszZb/2.png" class="cloud animate-cloud-med-slow w-[80vw] md:w-[60vw] top-[5vh] opacity-70 left-0" style="animation-delay: -10s;" alt="Cloud">
+        
+        <!-- 3 - Medium -->
+        <img src="https://i.postimg.cc/mrZjszZb/2.png" class="cloud animate-cloud-med w-[75vw] md:w-[55vw] top-[18vh] opacity-65 left-0" style="animation-delay: -55s;" alt="Cloud">
+        
+        <!-- 4 - Small (Deep background, slow) -->
+        <img src="https://i.postimg.cc/Jh7xLD78/4.png" class="cloud animate-cloud-slow w-[50vw] md:w-[35vw] top-[2vh] opacity-40 left-0" style="animation-delay: -5s;" alt="Cloud">
+        
+        <!-- 5 - Small (Deep background, slow) -->
+        <img src="https://i.postimg.cc/Jh7xLD78/4.png" class="cloud animate-cloud-slow w-[55vw] md:w-[40vw] top-[22vh] opacity-45 left-0" style="animation-delay: -80s;" alt="Cloud">
     </div>
 
     <!-- SPLASH SCREEN -->
@@ -158,9 +196,9 @@
                 <i class="ph-fill ph-heart text-orange-400 text-2xl drop-shadow-[0_0_5px_rgba(251,146,60,0.8)]"></i>
                 <h1 class="text-xl font-bold tracking-tight text-white hidden md:block" style="font-family: 'Pacifico', cursive;">Wifey!</h1>
             </div>
-            <div class="flex items-center gap-2 md:gap-4">
+            <div class="flex items-center gap-2 md:gap-4 flex-wrap">
                 
-                <!-- Places Focus Knob & Zoom (Hidden by default) -->
+                <!-- Places Focus Knob & Zoom -->
                 <div id="places-controls" class="hidden items-center gap-2 bg-neutral-950/60 px-3 py-1.5 rounded-full border border-neutral-700 backdrop-blur-sm mr-2 transition-all duration-300">
                     <button id="btn-places-shuffle" class="text-neutral-400 hover:text-white transition-colors flex items-center justify-center p-1" title="Randomize Place">
                         <i class="ph ph-shuffle text-lg"></i>
@@ -182,8 +220,17 @@
                 <button id="btn-theme" class="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
                     <i class="ph ph-sun text-lg"></i> <span class="hidden md:inline">Theme</span>
                 </button>
+
+                <div class="w-px h-6 bg-neutral-700 mx-1"></div>
+
+                <!-- Weather Button -->
+                <button id="btn-weather" class="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors" title="Toggle Weather">
+                    <i class="ph ph-cloud-rain text-lg"></i> <span class="hidden md:inline">Weather</span>
+                </button>
+
+                <div class="w-px h-6 bg-neutral-700 mx-1"></div>
                 
-                <button id="btn-dictionary" class="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors ml-2">
+                <button id="btn-dictionary" class="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
                     <i class="ph ph-book-open-text text-lg"></i> <span class="hidden md:inline">Dictionary</span>
                 </button>
 
@@ -199,17 +246,13 @@
             </div>
         </header>
 
-        <!-- Main Content Area -->
         <main class="flex-1 flex flex-col items-center py-6 px-4 gap-6 overflow-y-auto relative z-10">
-            
             <!-- Floating Toolbar -->
             <div id="toolbar" class="hidden flex-wrap items-center justify-center gap-1 p-2 bg-neutral-900/95 backdrop-blur border border-neutral-700 rounded-xl shadow-2xl sticky top-2 z-30 transition-all duration-500 max-w-full">
-                <!-- Fonts Dropdown -->
                 <div class="relative">
                     <button id="btn-font-menu" onmousedown="event.preventDefault()" class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white rounded-lg transition-colors border border-neutral-700 bg-neutral-950">
                         Fonts <i class="ph ph-caret-down"></i>
                     </button>
-                    
                     <div id="font-menu" class="hidden absolute top-full left-0 mt-2 w-56 bg-neutral-800 border border-neutral-700 rounded-lg shadow-xl py-2 z-50 flex flex-col max-h-64 overflow-y-auto">
                         <div class="px-3 pb-2 mb-2 border-b border-neutral-700 text-xs font-bold text-neutral-500 uppercase tracking-wider">Select Font</div>
                         <button onmousedown="event.preventDefault(); applyFont('Inter')" class="px-4 py-2 text-left text-neutral-200 hover:bg-neutral-700 hover:text-white w-full transition-colors" style="font-family: 'Inter'">Inter (Clean Sans)</button>
@@ -223,7 +266,6 @@
 
                 <div class="w-px h-6 bg-neutral-700 mx-1"></div>
 
-                <!-- Sizes -->
                 <div class="flex items-center gap-1 bg-neutral-800 p-1 rounded-lg">
                     <button onmousedown="event.preventDefault(); applySize('7')" class="px-2 py-1 text-xs font-bold text-neutral-300 hover:bg-neutral-700 hover:text-white rounded" title="Massive Title">Title</button>
                     <button onmousedown="event.preventDefault(); applySize('5')" class="px-2 py-1 text-xs font-bold text-neutral-300 hover:bg-neutral-700 hover:text-white rounded" title="Heading">Heading</button>
@@ -233,14 +275,12 @@
                 
                 <div class="w-px h-6 bg-neutral-700 mx-1"></div>
                 
-                <!-- Formatting -->
                 <button onmousedown="event.preventDefault(); applyCommand('bold')" class="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-md"><i class="ph ph-text-b"></i></button>
                 <button onmousedown="event.preventDefault(); applyCommand('italic')" class="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-md"><i class="ph ph-text-italic"></i></button>
                 <button onmousedown="event.preventDefault(); applyCommand('underline')" class="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-md"><i class="ph ph-text-underline"></i></button>
                 
                 <div class="w-px h-6 bg-neutral-700 mx-1"></div>
                 
-                <!-- Alignment -->
                 <button onmousedown="event.preventDefault(); applyCommand('justifyLeft')" class="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-md"><i class="ph ph-text-align-left"></i></button>
                 <button onmousedown="event.preventDefault(); applyCommand('justifyCenter')" class="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-md"><i class="ph ph-text-align-center"></i></button>
                 <button onmousedown="event.preventDefault(); applyCommand('justifyRight')" class="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-md"><i class="ph ph-text-align-right"></i></button>
@@ -250,7 +290,6 @@
             <div class="relative w-full max-w-[400px] flex-shrink-0 group z-10 mt-2">
                 <div id="canvas-container" class="w-full aspect-[4/5] rounded-lg overflow-hidden flex flex-col transition-all duration-700 bg-[#121212] text-white shadow-2xl relative border border-neutral-800">
                     
-                    <!-- Cover Slide View -->
                     <div id="cover-view" class="w-full h-full flex flex-col items-center justify-center relative bg-neutral-900/80">
                         <img id="cover-image-preview" src="" alt="Cover" class="hidden w-full h-full object-cover">
                         <label title="Upload Book Cover - Supported files: JPG, PNG. Dimensions: 1080 x 1350px exactly" id="cover-upload-label" class="cursor-pointer flex flex-col items-center justify-center gap-4 w-full h-full hover:bg-white/5 transition-colors border-2 border-dashed border-neutral-700 hover:border-blue-500 p-8 text-center absolute inset-0">
@@ -265,27 +304,21 @@
                         </label>
                     </div>
 
-                    <!-- Text Editor View -->
                     <div id="text-view" class="hidden w-full h-full p-8 relative overflow-hidden">
-                        <!-- THE IMPENETRABLE CANVAS -->
                         <div id="editor" contenteditable="true" data-placeholder="Start typing your story here..." class="ig-editor w-full h-full outline-none whitespace-pre-wrap break-words"></div>
                     </div>
                 </div>
             </div>
         </main>
 
-        <!-- Footer Navigation & Stats -->
         <footer class="bg-neutral-900/80 backdrop-blur-md border-t border-neutral-800 p-4 shrink-0 flex flex-col items-center gap-4 z-20 transition-colors duration-500" id="main-footer">
             <div class="flex flex-col md:flex-row items-center gap-6">
                 
-                <!-- Character Count Stats -->
                 <div class="text-xs text-neutral-400 flex flex-col items-center md:items-end w-48">
-                    <!-- CRITICAL: Initial HTML load now correctly says 1200 -->
                     <span id="char-count" class="font-bold text-neutral-200 transition-colors">0 / 1200 Chars</span>
                     <span class="opacity-70 text-blue-400 font-medium">Current Slide Capacity</span>
                 </div>
 
-                <!-- Navigation Pill -->
                 <div class="flex items-center gap-2 md:gap-4 bg-neutral-950 p-2 rounded-full border border-neutral-800 shadow-inner">
                     <button id="btn-prev" class="p-2 text-neutral-400 hover:text-white disabled:opacity-30 disabled:hover:text-neutral-400 transition-colors">
                         <i class="ph ph-caret-left text-xl"></i>
@@ -333,22 +366,18 @@
         </div>
     </div>
 
-    <!-- Hidden Export Container -->
     <div id="export-container">
         <div id="export-canvas" class="w-full h-full bg-[#121212] text-white overflow-hidden relative">
             <div id="export-content" class="export-content ig-editor whitespace-pre-wrap break-words overflow-hidden"></div>
         </div>
     </div>
 
-    <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg text-sm font-medium transition-all duration-300 transform translate-y-20 opacity-0 z-50 flex items-center gap-2 pointer-events-none text-center">
         <i class="ph ph-info text-lg shrink-0"></i> <span id="toast-msg"></span>
     </div>
 
     <script>
-        // State Constants
         const MAX_PAGES = 20;
-        // CRITICAL: Ensure Javascript logic triggers correctly at 1200 limit
         const MAX_CHARS = 1200;
         let pages = ['', '']; 
         let activePageIndex = 0;
@@ -356,7 +385,6 @@
         let theme = 'dark';
         let placesModeActive = false;
 
-        // DOM Elements
         const splashScreen = document.getElementById('splash-screen');
         const mainApp = document.getElementById('main-app');
         const btnStart = document.getElementById('btn-start');
@@ -366,7 +394,6 @@
         const toolbar = document.getElementById('toolbar');
         const canvasContainer = document.getElementById('canvas-container');
         
-        // Navigation & UI Elements
         const coverUploadInput = document.getElementById('cover-upload-input');
         const coverImagePreview = document.getElementById('cover-image-preview');
         const coverUploadLabel = document.getElementById('cover-upload-label');
@@ -383,7 +410,6 @@
         const charCountDisplay = document.getElementById('char-count');
         const toast = document.getElementById('toast');
         
-        // Places Elements
         const btnPlaces = document.getElementById('btn-places');
         const placesBgContainer = document.getElementById('places-bg-container');
         const placesBg = document.getElementById('places-bg');
@@ -392,7 +418,6 @@
         const zoomSlider = document.getElementById('zoom-slider');
         const btnPlacesShuffle = document.getElementById('btn-places-shuffle');
 
-        // Image Database
         const placesImages = [
             "https://i.imgur.com/5UFzerv.jpeg", "https://i.imgur.com/XCuiczb.jpeg", "https://i.imgur.com/6uJQCOC.jpeg",
             "https://i.imgur.com/anqxLvU.jpeg", "https://i.imgur.com/UMnOm10.jpeg", "https://i.imgur.com/m0j7Wod.jpeg",
@@ -415,43 +440,27 @@
         ];
 
         function setRandomPlace() {
-            if (placesImages.length === 0) {
-                showToast("No valid images remaining!");
-                return;
-            }
-            
+            if (placesImages.length === 0) return;
             const randomIndex = Math.floor(Math.random() * placesImages.length);
             const imgUrl = placesImages[randomIndex];
             
-            // Auto-Healing Engine: Test the image silently
             const tempImg = new Image();
-            
             tempImg.onload = () => {
-                // Imgur replaces deleted images with a tiny 161x81 "Removed" graphic.
-                // We check for that exact width to catch it!
                 if (tempImg.width === 161) {
-                    console.warn("Imgur deleted placeholder detected & removed: ", imgUrl);
-                    placesImages.splice(randomIndex, 1); // Delete the bad link
-                    setRandomPlace(); // Roll again immediately
+                    placesImages.splice(randomIndex, 1);
+                    setRandomPlace(); 
                     return;
                 }
-                
-                // If it loads normally, show it!
                 placesBg.style.backgroundImage = `url('${imgUrl}')`;
                 placesBg.style.opacity = '1';
             };
-            
             tempImg.onerror = () => {
-                // Catch hard 404 errors
-                console.warn("Broken link detected & removed: ", imgUrl);
                 placesImages.splice(randomIndex, 1);
                 setRandomPlace(); 
             };
-            
             tempImg.src = imgUrl;
         }
 
-        // Splash Screen
         btnStart.addEventListener('click', () => {
             splashScreen.classList.add('opacity-0');
             setTimeout(() => {
@@ -472,16 +481,13 @@
             } else {
                 toast.classList.add('bg-blue-600');
             }
-            
             setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 4000);
         }
 
-        // Places Mode Logic
         btnPlaces.addEventListener('click', () => {
             placesModeActive = !placesModeActive;
             if (placesModeActive) {
-                // Turn on Places
-                placesBg.style.opacity = '0'; // Prep for fade
+                placesBg.style.opacity = '0'; 
                 setRandomPlace();
                 placesBgContainer.classList.remove('opacity-0', 'pointer-events-none');
                 placesControls.classList.remove('hidden');
@@ -489,7 +495,6 @@
                 btnPlaces.classList.add('text-blue-400');
                 btnPlaces.classList.remove('text-neutral-400');
             } else {
-                // Turn off Places
                 placesBgContainer.classList.add('opacity-0', 'pointer-events-none');
                 placesControls.classList.add('hidden');
                 placesControls.classList.remove('flex');
@@ -498,31 +503,17 @@
             }
         });
 
-        // Shuffle Button Logic
         btnPlacesShuffle.addEventListener('click', () => {
             placesBg.style.opacity = '0';
-            setTimeout(() => {
-                setRandomPlace();
-            }, 300);
+            setTimeout(() => { setRandomPlace(); }, 300);
         });
-
-        // Focus Slider Logic
-        focusSlider.addEventListener('input', (e) => {
-            placesBg.style.filter = `blur(${e.target.value}px)`;
-        });
-
-        // Zoom Slider Logic
-        zoomSlider.addEventListener('input', (e) => {
-            placesBg.style.transform = `scale(${e.target.value / 100})`;
-        });
+        focusSlider.addEventListener('input', (e) => { placesBg.style.filter = `blur(${e.target.value}px)`; });
+        zoomSlider.addEventListener('input', (e) => { placesBg.style.transform = `scale(${e.target.value / 100})`; });
 
         let isReverting = false;
 
-        // Formatting Application (Blocks if it pushes text out of bounds)
         function applyCommand(command, value = null) {
             document.execCommand(command, false, value);
-            
-            // Physical Boundary Check
             if (editor.scrollHeight > editor.clientHeight + 2 || editor.textContent.length > MAX_CHARS) {
                 document.execCommand('undo');
                 showToast("Formatting blocked: Text exceeds slide boundaries!");
@@ -532,25 +523,19 @@
             editor.focus();
         }
 
-        // 1. Paste Interceptor & Binary Search Truncation
         editor.addEventListener('paste', (e) => {
             e.preventDefault();
-            
             let html = e.clipboardData.getData('text/html');
             let text = e.clipboardData.getData('text/plain');
             
-            // Scrub hidden Word/Google Docs styling and nasty non-breaking spaces
             if (html) {
                 html = html.replace(/&nbsp;/g, ' ').replace(/\u00A0/g, ' '); 
                 let temp = document.createElement('div');
                 temp.innerHTML = html;
                 const elements = temp.querySelectorAll("*");
                 elements.forEach(el => {
-                    el.removeAttribute('style');
-                    el.removeAttribute('class');
-                    el.removeAttribute('id');
-                    el.removeAttribute('width');
-                    el.removeAttribute('height');
+                    el.removeAttribute('style'); el.removeAttribute('class'); el.removeAttribute('id');
+                    el.removeAttribute('width'); el.removeAttribute('height');
                 });
                 text = temp.textContent || temp.innerText || "";
             } else {
@@ -558,119 +543,79 @@
             }
             
             isReverting = true; 
-            
             let currentLen = editor.textContent.length;
             let availableChars = MAX_CHARS - currentLen;
             
             if (availableChars <= 0) {
                 showToast("Slide is full. Paste on the next slide.");
-                isReverting = false;
-                return;
+                isReverting = false; return;
             }
 
-            // Split into words to try and fit as many as possible
             let words = text.split(/(\s+)/); 
-            let low = 0;
-            let high = words.length;
-            let bestFitIndex = 0;
+            let low = 0; let high = words.length; let bestFitIndex = 0;
             
             while (low <= high) {
                 let mid = Math.floor((low + high) / 2);
                 let attempt = words.slice(0, mid).join('');
-                
                 document.execCommand('insertText', false, attempt);
                 
-                // Check both Physical Height AND Character Limit
                 if (editor.scrollHeight <= editor.clientHeight + 2 && editor.textContent.length <= MAX_CHARS) {
-                    bestFitIndex = mid;
-                    low = mid + 1; 
+                    bestFitIndex = mid; low = mid + 1; 
                 } else {
                     high = mid - 1; 
                 }
-                
                 document.execCommand('undo');
             }
             
-            // Final insertion of the words that successfully fit
             let finalString = words.slice(0, bestFitIndex).join('');
             document.execCommand('insertText', false, finalString);
-            
             isReverting = false;
             editor.dispatchEvent(new Event('input'));
             
-            if (bestFitIndex < words.length) {
-                showToast(`Boundary hit! Copied ${finalString.length} chars. Paste remainder on next slide.`);
-            }
+            if (bestFitIndex < words.length) showToast(`Boundary hit! Copied ${finalString.length} chars. Paste remainder on next slide.`);
         });
 
-        // 2. Typing Blocker (Hard Wall)
         editor.addEventListener('keydown', (e) => {
-            // Allow backspace, delete, arrows, and shortcuts
             if (e.key === 'Backspace' || e.key === 'Delete' || e.ctrlKey || e.metaKey || e.key.includes('Arrow')) return;
-            
-            // Block if character limit reached
             if (editor.textContent.length >= MAX_CHARS) {
-                e.preventDefault();
-                showToast(`${MAX_CHARS} Character limit reached.`);
-                return;
+                e.preventDefault(); showToast(`${MAX_CHARS} Character limit reached.`); return;
             }
-
-            // Block if physical bottom boundary reached
             if (editor.scrollHeight > editor.clientHeight + 2) {
-                e.preventDefault();
-                showToast("Physical slide bottom reached.");
+                e.preventDefault(); showToast("Physical slide bottom reached.");
             }
         });
 
         editor.addEventListener('input', (e) => {
             if (isReverting) return; 
-            
-            // Failsafe rollback if somehow text bypassed the keydown event
             if (editor.scrollHeight > editor.clientHeight + 2 || editor.textContent.length > MAX_CHARS) {
-                isReverting = true;
-                document.execCommand('undo'); 
-                showToast("Slide capacity reached.");
-                isReverting = false;
+                isReverting = true; document.execCommand('undo'); 
+                showToast("Slide capacity reached."); isReverting = false;
             } else {
-                saveContent();
-                updateCharCount();
+                saveContent(); updateCharCount();
             }
         });
 
-        function saveContent() {
-            if (activePageIndex > 0) pages[activePageIndex] = editor.innerHTML;
-        }
+        function saveContent() { if (activePageIndex > 0) pages[activePageIndex] = editor.innerHTML; }
 
-        // Font Menu Logic
         fontMenuBtn.addEventListener('click', () => fontMenu.classList.toggle('hidden'));
         document.addEventListener('click', (e) => {
             if (!fontMenuBtn.contains(e.target) && !fontMenu.contains(e.target)) fontMenu.classList.add('hidden');
         });
 
-        function applyFont(fontName) {
-            applyCommand('fontName', fontName);
-            fontMenu.classList.add('hidden');
-        }
-        function applySize(size) {
-            applyCommand('fontSize', size);
-        }
+        function applyFont(fontName) { applyCommand('fontName', fontName); fontMenu.classList.add('hidden'); }
+        function applySize(size) { applyCommand('fontSize', size); }
 
-        // Navigation Logic
         btnPrev.addEventListener('click', () => { if (activePageIndex > 0) { activePageIndex--; updateUI(); }});
         btnNext.addEventListener('click', () => { if (activePageIndex < pages.length - 1) { activePageIndex++; updateUI(); }});
         
         btnAdd.addEventListener('click', () => {
             if (pages.length >= MAX_PAGES) { showToast('Maximum of 20 slides reached!'); return; }
-            pages.push('');
-            activePageIndex = pages.length - 1;
-            updateUI();
+            pages.push(''); activePageIndex = pages.length - 1; updateUI();
         });
 
         btnDelete.addEventListener('click', () => {
             if (activePageIndex === 0) {
-                coverImage = null;
-                coverImagePreview.src = '';
-                coverImagePreview.classList.add('hidden');
+                coverImage = null; coverImagePreview.src = ''; coverImagePreview.classList.add('hidden');
                 coverUploadLabel.classList.remove('opacity-0', 'hover:opacity-100');
                 coverUploadLabel.classList.add('bg-neutral-900/80');
             } else {
@@ -680,84 +625,59 @@
             updateUI();
         });
 
-        // Cover Upload
         coverUploadInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onloadend = () => {
-                    coverImage = reader.result;
-                    coverImagePreview.src = coverImage;
-                    coverImagePreview.classList.remove('hidden');
-                    coverUploadLabel.classList.remove('bg-neutral-900/80');
-                    coverUploadLabel.classList.add('opacity-0', 'hover:opacity-100');
+                    coverImage = reader.result; coverImagePreview.src = coverImage; coverImagePreview.classList.remove('hidden');
+                    coverUploadLabel.classList.remove('bg-neutral-900/80'); coverUploadLabel.classList.add('opacity-0', 'hover:opacity-100');
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        // Theme Logic
         btnTheme.addEventListener('click', () => {
             theme = theme === 'dark' ? 'light' : 'dark';
             if (theme === 'light') {
-                canvasContainer.classList.remove('bg-[#121212]', 'text-white');
-                canvasContainer.classList.add('bg-white', 'text-black');
+                canvasContainer.classList.remove('bg-[#121212]', 'text-white'); canvasContainer.classList.add('bg-white', 'text-black');
             } else {
-                canvasContainer.classList.remove('bg-white', 'text-black');
-                canvasContainer.classList.add('bg-[#121212]', 'text-white');
+                canvasContainer.classList.remove('bg-white', 'text-black'); canvasContainer.classList.add('bg-[#121212]', 'text-white');
             }
         });
 
         function updateUI() {
             if (activePageIndex === 0) {
-                pageIndicator.textContent = 'Cover Slide';
-                coverView.classList.remove('hidden');
-                textView.classList.add('hidden');
-                toolbar.classList.add('hidden');
-                deleteText.textContent = 'Remove Cover';
+                pageIndicator.textContent = 'Cover Slide'; coverView.classList.remove('hidden'); textView.classList.add('hidden');
+                toolbar.classList.add('hidden'); deleteText.textContent = 'Remove Cover';
                 charCountDisplay.textContent = `0 / ${MAX_CHARS} Chars`;
                 charCountDisplay.className = 'font-bold text-neutral-200 transition-colors';
             } else {
                 pageIndicator.textContent = `Slide ${activePageIndex} of ${pages.length - 1}`;
-                coverView.classList.add('hidden');
-                textView.classList.remove('hidden');
-                toolbar.classList.remove('hidden');
-                toolbar.classList.add('flex');
-                editor.innerHTML = pages[activePageIndex] || '';
-                deleteText.textContent = 'Clear Slide';
+                coverView.classList.add('hidden'); textView.classList.remove('hidden');
+                toolbar.classList.remove('hidden'); toolbar.classList.add('flex');
+                editor.innerHTML = pages[activePageIndex] || ''; deleteText.textContent = 'Clear Slide';
                 updateCharCount();
             }
-
-            btnPrev.disabled = activePageIndex === 0;
-            btnNext.disabled = activePageIndex === pages.length - 1;
-            btnAdd.disabled = pages.length >= MAX_PAGES;
+            btnPrev.disabled = activePageIndex === 0; btnNext.disabled = activePageIndex === pages.length - 1; btnAdd.disabled = pages.length >= MAX_PAGES;
         }
 
         function updateCharCount() {
             if (activePageIndex === 0) return;
             const textLen = editor.textContent.length;
             charCountDisplay.textContent = `${textLen} / ${MAX_CHARS} Chars`;
-            charCountDisplay.className = textLen >= MAX_CHARS 
-                ? 'font-bold text-red-400 transition-colors' 
-                : 'font-bold text-neutral-200 transition-colors';
+            charCountDisplay.className = textLen >= MAX_CHARS ? 'font-bold text-red-400 transition-colors' : 'font-bold text-neutral-200 transition-colors';
         }
 
-        // Export to ZIP Logic
         btnExport.addEventListener('click', async () => {
             showToast('Generating high-res slides... Please wait.');
-            btnExport.disabled = true;
-            btnExport.classList.add('opacity-50');
-            
-            const zip = new JSZip();
-            const exportCanvas = document.getElementById('export-canvas');
-            const exportContent = document.getElementById('export-content');
+            btnExport.disabled = true; btnExport.classList.add('opacity-50');
+            const zip = new JSZip(); const exportCanvas = document.getElementById('export-canvas'); const exportContent = document.getElementById('export-content');
             
             if (theme === 'light') {
-                exportCanvas.classList.remove('bg-[#121212]', 'text-white');
-                exportCanvas.classList.add('bg-white', 'text-black');
+                exportCanvas.classList.remove('bg-[#121212]', 'text-white'); exportCanvas.classList.add('bg-white', 'text-black');
             } else {
-                exportCanvas.classList.remove('bg-white', 'text-black');
-                exportCanvas.classList.add('bg-[#121212]', 'text-white');
+                exportCanvas.classList.remove('bg-white', 'text-black'); exportCanvas.classList.add('bg-[#121212]', 'text-white');
             }
 
             try {
@@ -776,40 +696,26 @@
                             exportContent.style.padding = '80px';
                         }
                     } else {
-                        exportContent.style.padding = '80px';
-                        exportContent.innerHTML = pages[i] || '';
+                        exportContent.style.padding = '80px'; exportContent.innerHTML = pages[i] || '';
                     }
 
                     await new Promise(resolve => setTimeout(resolve, 100));
-
-                    const canvas = await html2canvas(exportCanvas, {
-                        scale: 1, 
-                        useCORS: true,
-                        backgroundColor: theme === 'light' ? '#ffffff' : '#121212'
-                    });
-
+                    const canvas = await html2canvas(exportCanvas, { scale: 1, useCORS: true, backgroundColor: theme === 'light' ? '#ffffff' : '#121212' });
                     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-                    const slideNumber = String(i + 1).padStart(2, '0');
-                    zip.file(`${slideNumber}_slide.png`, blob);
+                    zip.file(`${String(i + 1).padStart(2, '0')}_slide.png`, blob);
                 }
 
                 const zipContent = await zip.generateAsync({ type: 'blob' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(zipContent);
-                link.download = 'Wifey_Story.zip';
-                link.click();
-                
+                const link = document.createElement('a'); link.href = URL.createObjectURL(zipContent);
+                link.download = 'Wifey_Story.zip'; link.click();
                 showToast('Download complete! Unzip to post.');
             } catch (error) {
-                console.error("Export failed:", error);
-                showToast('Export failed. See console for details.');
+                console.error("Export failed:", error); showToast('Export failed. See console for details.');
             } finally {
-                btnExport.disabled = false;
-                btnExport.classList.remove('opacity-50');
+                btnExport.disabled = false; btnExport.classList.remove('opacity-50');
             }
         });
 
-        // --- DICTIONARY LOGIC ---
         const btnDictionary = document.getElementById('btn-dictionary');
         const dictionaryPanel = document.getElementById('dictionary-panel');
         const btnCloseDict = document.getElementById('btn-close-dict');
@@ -817,76 +723,111 @@
         const dictResults = document.getElementById('dict-results');
         const btnHardcore = document.getElementById('btn-hardcore');
 
-        // Hardcore Mode Coming Soon Toast
-        btnHardcore.addEventListener('click', () => {
-            showToast('⚡ Hardcore Mode is coming soon! Prepare yourself.');
-        });
-
-        btnDictionary.addEventListener('click', () => {
-            dictionaryPanel.classList.remove('translate-x-full');
-            setTimeout(() => dictSearchInput.focus(), 100);
-        });
-
-        btnCloseDict.addEventListener('click', () => {
-            dictionaryPanel.classList.add('translate-x-full');
-        });
+        btnHardcore.addEventListener('click', () => { showToast('⚡ Hardcore Mode is coming soon! Prepare yourself.'); });
+        btnDictionary.addEventListener('click', () => { dictionaryPanel.classList.remove('translate-x-full'); setTimeout(() => dictSearchInput.focus(), 100); });
+        btnCloseDict.addEventListener('click', () => { dictionaryPanel.classList.add('translate-x-full'); });
 
         dictSearchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const word = dictSearchInput.value.trim();
-                if (word) fetchDefinition(word);
-            }
+            if (e.key === 'Enter') { const word = dictSearchInput.value.trim(); if (word) fetchDefinition(word); }
         });
 
         async function fetchDefinition(word) {
             dictResults.innerHTML = `<div class="text-center text-neutral-400 mt-10"><i class="ph ph-spinner animate-spin text-4xl mb-3 text-blue-500"></i><p>Searching the archives...</p></div>`;
-            
             try {
                 const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
                 if (!response.ok) throw new Error('Word not found');
-                
-                const data = await response.json();
-                const entry = data[0];
-                
-                let html = `
-                    <div class="mb-2 border-b border-neutral-800 pb-4">
-                        <h3 class="text-3xl font-extrabold text-white tracking-tight">${entry.word}</h3>
-                        ${entry.phonetic ? `<p class="text-blue-400 font-medium text-lg mt-1">${entry.phonetic}</p>` : ''}
-                    </div>
-                `;
+                const data = await response.json(); const entry = data[0];
+                let html = `<div class="mb-2 border-b border-neutral-800 pb-4"><h3 class="text-3xl font-extrabold text-white tracking-tight">${entry.word}</h3>${entry.phonetic ? `<p class="text-blue-400 font-medium text-lg mt-1">${entry.phonetic}</p>` : ''}</div>`;
                 
                 entry.meanings.forEach(meaning => {
-                    html += `<div class="mb-4">
-                                <div class="inline-block px-2 py-1 bg-neutral-800 text-xs font-bold uppercase tracking-wider text-neutral-300 rounded mb-3">${meaning.partOfSpeech}</div>
-                                <ul class="list-disc pl-5 text-neutral-300 space-y-3">`;
-                    
+                    html += `<div class="mb-4"><div class="inline-block px-2 py-1 bg-neutral-800 text-xs font-bold uppercase tracking-wider text-neutral-300 rounded mb-3">${meaning.partOfSpeech}</div><ul class="list-disc pl-5 text-neutral-300 space-y-3">`;
                     meaning.definitions.slice(0, 4).forEach(def => {
                         html += `<li><span class="text-neutral-200">${def.definition}</span>`;
                         if (def.example) html += `<br><span class="text-neutral-500 italic text-sm mt-1 block">"${def.example}"</span>`;
                         html += `</li>`;
                     });
-                    
                     html += `</ul>`;
-                    
                     if (meaning.synonyms && meaning.synonyms.length > 0) {
-                        html += `<div class="mt-4 text-sm bg-neutral-900 p-3 rounded-lg border border-neutral-800">
-                                    <span class="text-neutral-500 font-medium">Synonyms: </span>
-                                    <span class="text-blue-400">${meaning.synonyms.slice(0, 6).join(', ')}</span>
-                                 </div>`;
+                        html += `<div class="mt-4 text-sm bg-neutral-900 p-3 rounded-lg border border-neutral-800"><span class="text-neutral-500 font-medium">Synonyms: </span><span class="text-blue-400">${meaning.synonyms.slice(0, 6).join(', ')}</span></div>`;
                     }
                     html += `</div>`;
                 });
-                
                 dictResults.innerHTML = html;
             } catch (error) {
-                dictResults.innerHTML = `
-                    <div class="text-center text-neutral-500 mt-10">
-                        <i class="ph ph-warning-circle text-5xl mb-3 text-red-400 opacity-80"></i>
-                        <p>We couldn't find a definition for "<span class="text-white">${word}</span>".</p>
-                        <p class="text-sm mt-2 opacity-70">Check your spelling or try another word.</p>
-                    </div>`;
+                dictResults.innerHTML = `<div class="text-center text-neutral-500 mt-10"><i class="ph ph-warning-circle text-5xl mb-3 text-red-400 opacity-80"></i><p>We couldn't find a definition for "<span class="text-white">${word}</span>".</p><p class="text-sm mt-2 opacity-70">Check your spelling or try another word.</p></div>`;
             }
         }
+
+        const btnWeather = document.getElementById('btn-weather');
+        const weatherCanvas = document.getElementById('weather-canvas');
+        const cloudsContainer = document.getElementById('clouds-container');
+        const ctxWeather = weatherCanvas.getContext('2d');
+        let weatherActive = false;
+        let rainDrops = [];
+        let rainAnimationId;
+
+        function resizeWeatherCanvas() {
+            weatherCanvas.width = window.innerWidth;
+            weatherCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeWeatherCanvas);
+        resizeWeatherCanvas(); 
+
+        function createRain() {
+            rainDrops = [];
+            for (let i = 0; i < 150; i++) {
+                rainDrops.push({
+                    x: Math.random() * weatherCanvas.width,
+                    y: Math.random() * weatherCanvas.height,
+                    length: Math.random() * 20 + 10,
+                    speed: Math.random() * 10 + 15,
+                    opacity: Math.random() * 0.3 + 0.1,
+                    angle: 0.1 
+                });
+            }
+        }
+
+        function animateRain() {
+            ctxWeather.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
+            ctxWeather.lineWidth = 1.5;
+            ctxWeather.lineCap = 'round';
+
+            rainDrops.forEach(drop => {
+                ctxWeather.beginPath();
+                ctxWeather.moveTo(drop.x, drop.y);
+                ctxWeather.lineTo(drop.x + (drop.angle * drop.length), drop.y + drop.length);
+                ctxWeather.strokeStyle = `rgba(180, 210, 255, ${drop.opacity})`;
+                ctxWeather.stroke();
+
+                drop.y += drop.speed;
+                drop.x += drop.angle * drop.speed;
+
+                if (drop.y > weatherCanvas.height) {
+                    drop.y = -drop.length;
+                    drop.x = Math.random() * weatherCanvas.width;
+                }
+            });
+
+            if (weatherActive) rainAnimationId = requestAnimationFrame(animateRain);
+        }
+
+        btnWeather.addEventListener('click', () => {
+            weatherActive = !weatherActive;
+            if (weatherActive) {
+                btnWeather.classList.add('text-blue-400');
+                btnWeather.classList.remove('text-neutral-400');
+                weatherCanvas.classList.remove('opacity-0');
+                cloudsContainer.classList.add('weather-active'); // Summon the clouds
+                createRain();
+                animateRain();
+            } else {
+                btnWeather.classList.remove('text-blue-400');
+                btnWeather.classList.add('text-neutral-400');
+                weatherCanvas.classList.add('opacity-0');
+                cloudsContainer.classList.remove('weather-active'); // Banish the clouds
+                setTimeout(() => { if (!weatherActive) cancelAnimationFrame(rainAnimationId); }, 1000);
+            }
+        });
     </script>
 </body>
 </html>

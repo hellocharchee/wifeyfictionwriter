@@ -39,7 +39,19 @@
             100% { transform: translateX(100%); }
         }
         
+        @keyframes heartGlow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(251,146,60,0.4)); }
+            50% { transform: scale(1.15); filter: drop-shadow(0 0 35px rgba(251,146,60,1)); }
+        }
+
+        @keyframes headerPulseGlow {
+            0%, 100% { filter: drop-shadow(0 0 2px rgba(251,146,60,0.4)); }
+            50% { filter: drop-shadow(0 0 12px rgba(251,146,60,1)); }
+        }
+        
         .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-heart-glow { animation: heartGlow 2.5s ease-in-out infinite; }
+        .animate-header-pulse { animation: headerPulseGlow 3s ease-in-out infinite; }
         .animate-breathe { animation: breathe 10s ease-in-out infinite; transform-origin: top left; }
         .bg-gradient-pan {
             background-size: 200% 200%;
@@ -168,7 +180,7 @@
         
         <div class="z-10 flex flex-col items-center text-center px-4 max-w-2xl animate-float">
             <div class="bg-[#5c341e]/40 backdrop-blur-md border border-[#8a4e2d] p-6 rounded-3xl mb-8 shadow-2xl flex items-center justify-center">
-                <i class="ph-fill ph-heart text-5xl text-orange-400 drop-shadow-[0_0_15px_rgba(251,146,60,0.8)]"></i>
+                <i class="ph-fill ph-heart text-5xl text-orange-400 animate-heart-glow"></i>
             </div>
             
             <h1 class="mb-12 flex flex-col items-center">
@@ -193,7 +205,7 @@
         <!-- Header -->
         <header class="flex items-center justify-between p-4 bg-neutral-900/80 backdrop-blur-md border-b border-neutral-800 shrink-0 z-20 transition-colors duration-500" id="main-header">
             <div class="flex items-center gap-3">
-                <i class="ph-fill ph-heart text-orange-400 text-2xl drop-shadow-[0_0_5px_rgba(251,146,60,0.8)]"></i>
+                <i class="ph-fill ph-heart text-orange-400 text-2xl animate-header-pulse"></i>
                 <h1 class="text-xl font-bold tracking-tight text-white hidden md:block" style="font-family: 'Pacifico', cursive;">Wifey!</h1>
             </div>
             <div class="flex items-center gap-2 md:gap-4 flex-wrap">

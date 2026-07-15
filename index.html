@@ -20,7 +20,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <style>
-        /* Custom Animations for Splash Screen */
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-15px); }
@@ -58,7 +57,6 @@
             animation: gradientPan 8s ease infinite;
         }
 
-        /* --- CLOUD PARALLAX ANIMATIONS --- */
         @keyframes driftRight {
             0% { transform: translateX(-120%); }
             100% { transform: translateX(120vw); }
@@ -72,7 +70,6 @@
             position: absolute;
             max-width: none;
             will-change: transform;
-            /* Dims the clouds slightly for a stormy, moody vibe */
             filter: brightness(0.75) contrast(1.1); 
         }
         
@@ -81,13 +78,11 @@
         .animate-cloud-med-slow { animation: driftLeft 90s linear infinite; }
         .animate-cloud-slow { animation: driftRight 130s linear infinite; }
 
-        /* CRITICAL FIX: The Cursive Gradient Guillotine */
         .fix-cursive-clip {
             text-shadow: 0px 10px 10px rgba(0,0,0,0.01);
             padding-bottom: 20px;
         }
 
-        /* --- THE IMPENETRABLE WALL ENGINE --- */
         .ig-editor { font-family: 'Inter', sans-serif; }
         .ig-editor[data-placeholder]:empty:before {
             content: attr(data-placeholder);
@@ -108,7 +103,7 @@
         .ig-editor p, .ig-editor div { margin-bottom: 0.75em; max-width: 100% !important; }
         .ig-editor:focus { outline: none; }
         
-        /* CRITICAL FIX: The Scrollbar Assassin & Rigid Layout */
+        /* Scrollbar hiding & Rigid Layout */
         .ig-editor::-webkit-scrollbar { display: none !important; }
         .ig-editor {
             -ms-overflow-style: none !important;
@@ -125,17 +120,6 @@
             overflow-wrap: anywhere !important;
             word-wrap: break-word !important;
         }
-
-        /* Export Container (Hidden) */
-        #export-container {
-            position: fixed;
-            top: -9999px; left: -9999px;
-            z-index: -1;
-            overflow: hidden !important; 
-        }
-        .export-content {
-            width: 100%; height: 100%;
-        }
     </style>
 </head>
 <body class="bg-neutral-950 text-white font-sans w-full h-screen flex flex-col overflow-hidden relative">
@@ -146,27 +130,16 @@
         <div class="absolute inset-0 bg-black/50"></div>
     </div>
 
-    <!-- WEATHER CANVAS LAYER (Rain falls behind the foreground clouds) -->
+    <!-- WEATHER CANVAS LAYER -->
     <canvas id="weather-canvas" class="fixed inset-0 z-0 pointer-events-none opacity-0 transition-opacity duration-1000"></canvas>
 
     <!-- CLOUDS PARALLAX LAYER -->
     <div id="clouds-container" class="fixed inset-0 z-0 pointer-events-none opacity-0 transition-opacity duration-1000 overflow-hidden">
-        <!-- 6 - X Large (Foreground, moves fast) -->
         <img src="https://i.postimg.cc/W4p8vFpr/6.png" class="cloud animate-cloud-fast w-[150vw] md:w-[130vw] top-[-15vh] opacity-90 left-0" style="animation-delay: -20s;" alt="Cloud">
-        
-        <!-- 1 - Large -->
         <img src="https://i.postimg.cc/mrZjszZD/1.png" class="cloud animate-cloud-med w-[110vw] md:w-[90vw] top-[-5vh] opacity-80 left-0" style="animation-delay: -45s;" alt="Cloud">
-        
-        <!-- 2 - Medium (Drifting left to cross paths) -->
         <img src="https://i.postimg.cc/mrZjszZb/2.png" class="cloud animate-cloud-med-slow w-[80vw] md:w-[60vw] top-[5vh] opacity-70 left-0" style="animation-delay: -10s;" alt="Cloud">
-        
-        <!-- 3 - Medium -->
         <img src="https://i.postimg.cc/mrZjszZb/2.png" class="cloud animate-cloud-med w-[75vw] md:w-[55vw] top-[18vh] opacity-65 left-0" style="animation-delay: -55s;" alt="Cloud">
-        
-        <!-- 4 - Small (Deep background, slow) -->
         <img src="https://i.postimg.cc/Jh7xLD78/4.png" class="cloud animate-cloud-slow w-[50vw] md:w-[35vw] top-[2vh] opacity-40 left-0" style="animation-delay: -5s;" alt="Cloud">
-        
-        <!-- 5 - Small (Deep background, slow) -->
         <img src="https://i.postimg.cc/Jh7xLD78/4.png" class="cloud animate-cloud-slow w-[55vw] md:w-[40vw] top-[22vh] opacity-45 left-0" style="animation-delay: -80s;" alt="Cloud">
     </div>
 
@@ -207,7 +180,6 @@
             </div>
             <div class="flex items-center gap-2 md:gap-4 flex-wrap">
                 
-                <!-- Places Focus Knob & Zoom -->
                 <div id="places-controls" class="hidden items-center gap-2 bg-neutral-950/60 px-3 py-1.5 rounded-full border border-neutral-700 backdrop-blur-sm mr-2 transition-all duration-300">
                     <button id="btn-places-shuffle" class="text-neutral-400 hover:text-white transition-colors flex items-center justify-center p-1" title="Randomize Place">
                         <i class="ph ph-shuffle text-lg"></i>
@@ -232,7 +204,6 @@
 
                 <div class="w-px h-6 bg-neutral-700 mx-1"></div>
 
-                <!-- Weather Button -->
                 <button id="btn-weather" class="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors" title="Toggle Weather">
                     <i class="ph ph-cloud-rain text-lg"></i> <span class="hidden md:inline">Weather</span>
                 </button>
@@ -375,19 +346,13 @@
         </div>
     </div>
 
-    <div id="export-container">
-        <div id="export-canvas" class="bg-[#121212] text-white overflow-hidden relative">
-            <div id="export-content" class="export-content ig-editor whitespace-pre-wrap break-words overflow-hidden"></div>
-        </div>
-    </div>
-
     <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg text-sm font-medium transition-all duration-300 transform translate-y-20 opacity-0 z-50 flex items-center gap-2 pointer-events-none text-center">
         <i class="ph ph-info text-lg shrink-0"></i> <span id="toast-msg"></span>
     </div>
 
     <script>
         const MAX_PAGES = 20;
-        const MAX_CHARS = 1200;
+        const MAX_CHARS = 1200; // Permanently updated to 1200
         let pages = ['', '']; 
         let activePageIndex = 0;
         let coverImage = null;
@@ -682,56 +647,38 @@
             showToast('Generating 1:1 exact slides... Please wait.');
             btnExport.disabled = true; btnExport.classList.add('opacity-50');
             const zip = new JSZip(); 
-            const exportCanvas = document.getElementById('export-canvas'); 
-            const exportContent = document.getElementById('export-content');
             
-            // MAGIC WYSIWYG FIX: Force the invisible export container to be the EXACT pixel dimensions of your screen preview
+            // THE ULTIMATE WYSIWYG FIX
             const visualCanvas = document.getElementById('canvas-container');
-            const vWidth = visualCanvas.clientWidth;
-            const vHeight = visualCanvas.clientHeight;
             
-            exportCanvas.style.width = vWidth + 'px';
-            exportCanvas.style.height = vHeight + 'px';
+            // This multiplier takes the exact screen box and stretches the raster output up to 1080px perfectly!
+            const renderScale = 1080 / visualCanvas.clientWidth;
             
-            // We calculate exactly how much to zoom in to hit 1080px (Instagram width) without breaking line breaks
-            // This maintains 1:1 formatting while still giving you a crisp, high-res image!
-            const renderScale = 1080 / vWidth;
+            const originalClasses = visualCanvas.className;
+            const originalTransition = visualCanvas.style.transition;
+            const originalPageIndex = activePageIndex;
+            const originalEditorHtml = editor.innerHTML;
             
-            if (theme === 'light') {
-                exportCanvas.classList.remove('bg-[#121212]', 'text-white'); exportCanvas.classList.add('bg-white', 'text-black');
-            } else {
-                exportCanvas.classList.remove('bg-white', 'text-black'); exportCanvas.classList.add('bg-[#121212]', 'text-white');
-            }
+            visualCanvas.style.transition = 'none';
+            visualCanvas.classList.remove('rounded-lg', 'border', 'border-neutral-800', 'shadow-2xl');
 
             try {
                 for (let i = 0; i < pages.length; i++) {
                     if (i === 0) {
-                        if (coverImage) {
-                            exportContent.innerHTML = `<img src="${coverImage}" style="width:100%; height:100%; object-fit:cover;" />`;
-                            exportContent.style.padding = '0';
-                        } else {
-                            exportContent.innerHTML = `
-                                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; color:#525252; background:#1a1a1a;">
-                                    <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: #60a5fa;">Upload a Book Cover</h1>
-                                    <p style="font-size: 1.25rem;">Dimensions: 1080 x 1350px exactly</p>
-                                </div>
-                            `;
-                            exportContent.style.padding = '32px';
-                        }
+                        textView.classList.add('hidden');
+                        coverView.classList.remove('hidden');
                     } else {
-                        // Match the exact 32px (p-8) padding from the visual editor
-                        exportContent.style.padding = '32px'; 
-                        exportContent.innerHTML = pages[i] || '';
+                        coverView.classList.add('hidden');
+                        textView.classList.remove('hidden');
+                        editor.innerHTML = pages[i] || '';
                     }
 
-                    await new Promise(resolve => setTimeout(resolve, 150)); // Allow DOM to settle
+                    await new Promise(resolve => setTimeout(resolve, 150)); 
 
-                    const canvas = await html2canvas(exportCanvas, { 
+                    const canvas = await html2canvas(visualCanvas, { 
                         scale: renderScale, 
                         useCORS: true, 
-                        backgroundColor: theme === 'light' ? '#ffffff' : '#121212',
-                        windowWidth: vWidth,
-                        windowHeight: vHeight
+                        backgroundColor: theme === 'light' ? '#ffffff' : '#121212'
                     });
                     
                     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
@@ -739,13 +686,29 @@
                 }
 
                 const zipContent = await zip.generateAsync({ type: 'blob' });
-                const link = document.createElement('a'); link.href = URL.createObjectURL(zipContent);
-                link.download = 'Wifey_Story.zip'; link.click();
+                const link = document.createElement('a'); 
+                link.href = URL.createObjectURL(zipContent);
+                link.download = 'Wifey_Story.zip'; 
+                link.click();
                 showToast('Download complete! Unzip to post.');
             } catch (error) {
-                console.error("Export failed:", error); showToast('Export failed. See console for details.');
+                console.error("Export failed:", error); 
+                showToast('Export failed. See console for details.');
             } finally {
-                btnExport.disabled = false; btnExport.classList.remove('opacity-50');
+                visualCanvas.className = originalClasses;
+                visualCanvas.style.transition = originalTransition;
+                
+                if (originalPageIndex === 0) {
+                    textView.classList.add('hidden');
+                    coverView.classList.remove('hidden');
+                } else {
+                    coverView.classList.add('hidden');
+                    textView.classList.remove('hidden');
+                }
+                editor.innerHTML = originalEditorHtml;
+                
+                btnExport.disabled = false; 
+                btnExport.classList.remove('opacity-50');
             }
         });
 
@@ -850,14 +813,14 @@
                 btnWeather.classList.add('text-blue-400');
                 btnWeather.classList.remove('text-neutral-400');
                 weatherCanvas.classList.remove('opacity-0');
-                cloudsContainer.classList.add('weather-active'); // Summon the clouds
+                cloudsContainer.classList.add('weather-active'); 
                 createRain();
                 animateRain();
             } else {
                 btnWeather.classList.remove('text-blue-400');
                 btnWeather.classList.add('text-neutral-400');
                 weatherCanvas.classList.add('opacity-0');
-                cloudsContainer.classList.remove('weather-active'); // Banish the clouds
+                cloudsContainer.classList.remove('weather-active'); 
                 setTimeout(() => { if (!weatherActive) cancelAnimationFrame(rainAnimationId); }, 1000);
             }
         });

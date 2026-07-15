@@ -130,14 +130,11 @@
         #export-container {
             position: fixed;
             top: -9999px; left: -9999px;
-            width: 1080px; height: 1350px;
             z-index: -1;
             overflow: hidden !important; 
         }
         .export-content {
             width: 100%; height: 100%;
-            padding: 80px; 
-            font-size: 2.5rem; 
         }
     </style>
 </head>
@@ -379,7 +376,7 @@
     </div>
 
     <div id="export-container">
-        <div id="export-canvas" class="w-full h-full bg-[#121212] text-white overflow-hidden relative">
+        <div id="export-canvas" class="bg-[#121212] text-white overflow-hidden relative">
             <div id="export-content" class="export-content ig-editor whitespace-pre-wrap break-words overflow-hidden"></div>
         </div>
     </div>
@@ -682,9 +679,23 @@
         }
 
         btnExport.addEventListener('click', async () => {
-            showToast('Generating high-res slides... Please wait.');
+            showToast('Generating 1:1 exact slides... Please wait.');
             btnExport.disabled = true; btnExport.classList.add('opacity-50');
-            const zip = new JSZip(); const exportCanvas = document.getElementById('export-canvas'); const exportContent = document.getElementById('export-content');
+            const zip = new JSZip(); 
+            const exportCanvas = document.getElementById('export-canvas'); 
+            const exportContent = document.getElementById('export-content');
+            
+            // MAGIC WYSIWYG FIX: Force the invisible export container to be the EXACT pixel dimensions of your screen preview
+            const visualCanvas = document.getElementById('canvas-container');
+            const vWidth = visualCanvas.clientWidth;
+            const vHeight = visualCanvas.clientHeight;
+            
+            exportCanvas.style.width = vWidth + 'px';
+            exportCanvas.style.height = vHeight + 'px';
+            
+            // We calculate exactly how much to zoom in to hit 1080px (Instagram width) without breaking line breaks
+            // This maintains 1:1 formatting while still giving you a crisp, high-res image!
+            const renderScale = 1080 / vWidth;
             
             if (theme === 'light') {
                 exportCanvas.classList.remove('bg-[#121212]', 'text-white'); exportCanvas.classList.add('bg-white', 'text-black');
@@ -701,18 +712,28 @@
                         } else {
                             exportContent.innerHTML = `
                                 <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; color:#525252; background:#1a1a1a;">
-                                    <h1 style="font-size: 4rem; margin-bottom: 1rem; color: #60a5fa;">Upload a Book Cover</h1>
-                                    <p style="font-size: 2rem;">Dimensions: 1080 x 1350px exactly</p>
+                                    <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: #60a5fa;">Upload a Book Cover</h1>
+                                    <p style="font-size: 1.25rem;">Dimensions: 1080 x 1350px exactly</p>
                                 </div>
                             `;
-                            exportContent.style.padding = '80px';
+                            exportContent.style.padding = '32px';
                         }
                     } else {
-                        exportContent.style.padding = '80px'; exportContent.innerHTML = pages[i] || '';
+                        // Match the exact 32px (p-8) padding from the visual editor
+                        exportContent.style.padding = '32px'; 
+                        exportContent.innerHTML = pages[i] || '';
                     }
 
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    const canvas = await html2canvas(exportCanvas, { scale: 1, useCORS: true, backgroundColor: theme === 'light' ? '#ffffff' : '#121212' });
+                    await new Promise(resolve => setTimeout(resolve, 150)); // Allow DOM to settle
+
+                    const canvas = await html2canvas(exportCanvas, { 
+                        scale: renderScale, 
+                        useCORS: true, 
+                        backgroundColor: theme === 'light' ? '#ffffff' : '#121212',
+                        windowWidth: vWidth,
+                        windowHeight: vHeight
+                    });
+                    
                     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
                     zip.file(`${String(i + 1).padStart(2, '0')}_slide.png`, blob);
                 }

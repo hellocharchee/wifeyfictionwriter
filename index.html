@@ -38,20 +38,39 @@
             100% { transform: translateX(100%); }
         }
         
-        @keyframes heartGlow {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(251,146,60,0.4)); }
-            50% { transform: scale(1.15); filter: drop-shadow(0 0 35px rgba(251,146,60,1)); }
-        }
-
+        /* Smooth glowing header heart (No beating/scaling) */
         @keyframes headerPulseGlow {
             0%, 100% { filter: drop-shadow(0 0 2px rgba(251,146,60,0.4)); }
-            50% { filter: drop-shadow(0 0 12px rgba(251,146,60,1)); }
+            50% { filter: drop-shadow(0 0 15px rgba(251,146,60,1)); }
         }
-        
+
+        /* PRINTING PRESS EFFECTS */
+        @keyframes printShake {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(-1px, 1px) rotate(-0.5deg); }
+            50% { transform: translate(1px, -1px) rotate(0.5deg); }
+            75% { transform: translate(-1px, -1px) rotate(0deg); }
+        }
+        @keyframes scanDown {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; height: 4px; box-shadow: 0 0 30px 5px rgba(255,255,255,0.8); }
+            90% { opacity: 1; height: 4px; box-shadow: 0 0 30px 5px rgba(255,255,255,0.8); }
+            100% { top: 100%; opacity: 0; }
+        }
+
         .animate-float { animation: float 6s ease-in-out infinite; }
-        .animate-heart-glow { animation: heartGlow 2.5s ease-in-out infinite; }
         .animate-header-pulse { animation: headerPulseGlow 3s ease-in-out infinite; }
-        .animate-breathe { animation: breathe 10s ease-in-out infinite; transform-origin: top left; }
+        .animate-print-shake { animation: printShake 0.15s infinite; }
+        
+        .print-scanner {
+            position: absolute;
+            left: 0; right: 0;
+            background: #ffffff;
+            z-index: 50;
+            animation: scanDown 0.8s linear forwards;
+            pointer-events: none;
+        }
+
         .bg-gradient-pan {
             background-size: 200% 200%;
             animation: gradientPan 8s ease infinite;
@@ -83,6 +102,7 @@
             padding-bottom: 20px;
         }
 
+        /* Editor specific strict rules */
         .ig-editor { font-family: 'Inter', sans-serif; }
         .ig-editor[data-placeholder]:empty:before {
             content: attr(data-placeholder);
@@ -120,6 +140,9 @@
             overflow-wrap: anywhere !important;
             word-wrap: break-word !important;
         }
+
+        /* Inset shadow for lever track */
+        .inset-inner-shadow { box-shadow: inset 0 10px 20px rgba(0,0,0,0.8); }
     </style>
 </head>
 <body class="bg-neutral-950 text-white font-sans w-full h-screen flex flex-col overflow-hidden relative">
@@ -143,6 +166,27 @@
         <img src="https://i.postimg.cc/Jh7xLD78/4.png" class="cloud animate-cloud-slow w-[55vw] md:w-[40vw] top-[22vh] opacity-45 left-0" style="animation-delay: -80s;" alt="Cloud">
     </div>
 
+    <!-- PRINTING PRESS LEVER OVERLAY -->
+    <div id="lever-modal" class="fixed inset-0 z-[100] hidden flex-col items-center justify-center bg-black/85 backdrop-blur-md transition-opacity duration-500 opacity-0 select-none">
+        <div class="text-center mb-12 animate-float">
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-3" style="font-family: 'Playfair Display', serif;">The Printing Press</h2>
+            <p class="text-neutral-400 font-mono tracking-widest uppercase text-sm">Pull lever to mint your story</p>
+        </div>
+        
+        <!-- The Machine -->
+        <div class="relative w-24 h-64 bg-neutral-900 border-4 border-neutral-700 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.8)] flex justify-center p-2 mb-10">
+            <!-- The Track -->
+            <div class="w-4 h-full bg-black rounded-full inset-inner-shadow relative">
+                <!-- The Handle -->
+                <div id="lever-handle" class="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-20 bg-gradient-to-b from-rose-500 to-rose-700 rounded-full cursor-pointer shadow-[0_10px_20px_rgba(225,29,72,0.4)] border-b-[6px] border-rose-900 flex items-center justify-center hover:brightness-110 active:cursor-grabbing transform transition-transform" style="touch-action: none;">
+                    <div class="w-10 h-10 rounded-full bg-rose-400/30"></div>
+                </div>
+            </div>
+        </div>
+        
+        <button id="btn-cancel-print" class="px-6 py-2 rounded-full border border-neutral-700 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors">Abort Sequence</button>
+    </div>
+
     <!-- SPLASH SCREEN -->
     <div id="splash-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-[#3b2314] to-[#1a0f09] overflow-hidden transition-opacity duration-700">
         <div class="absolute top-1/2 left-1/4 w-[500px] h-[500px] bg-orange-600/20 rounded-full blur-[100px] animate-breathe"></div>
@@ -150,10 +194,12 @@
         
         <div class="z-10 flex flex-col items-center text-center px-4 max-w-2xl animate-float">
             <div class="bg-[#5c341e]/40 backdrop-blur-md border border-[#8a4e2d] p-6 rounded-3xl mb-8 shadow-2xl flex items-center justify-center">
-                <i class="ph-fill ph-heart text-5xl text-orange-400 animate-heart-glow"></i>
+                <!-- Static heart icon -->
+                <i class="ph-fill ph-heart text-5xl text-orange-400 drop-shadow-[0_0_15px_rgba(251,146,60,0.8)]"></i>
             </div>
             
             <h1 class="mb-12 flex flex-col items-center">
+                <!-- Wifey! Logo -->
                 <span class="text-7xl md:text-9xl bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-300 to-rose-400 bg-gradient-pan drop-shadow-sm fix-cursive-clip pb-6 block" style="font-family: 'Pacifico', cursive; line-height: 1.5; padding-bottom: 24px;">
                     Wifey!
                 </span>
@@ -172,7 +218,7 @@
     </div>
 
     <!-- MAIN APP WRAPPER -->
-    <div id="main-app" class="hidden flex-col h-full w-full relative z-10">
+    <div id="main-app" class="hidden flex-col h-full w-full relative z-10 transition-transform">
         
         <!-- Header -->
         <header class="flex items-center justify-between p-4 bg-neutral-900/80 backdrop-blur-md border-b border-neutral-800 shrink-0 z-20 transition-colors duration-500" id="main-header">
@@ -219,11 +265,12 @@
                 <div class="w-px h-6 bg-neutral-700 mx-1 hidden md:block"></div>
 
                 <button id="btn-hardcore" class="flex items-center gap-2 text-sm text-rose-500 hover:text-rose-400 transition-colors" title="Coming Soon!">
-                    <i class="ph ph-lightning text-lg drop-shadow-[0_0_5px_rgba(244,63,94,0.5)]"></i> <span class="hidden md:inline font-semibold">Hardcore Mode</span>
+                    <i class="ph-fill ph-lightning text-lg drop-shadow-[0_0_5px_rgba(244,63,94,0.5)]"></i> <span class="hidden md:inline font-semibold">Hardcore Mode</span>
                 </button>
 
+                <!-- EXPORT BUTTON -->
                 <button id="btn-export" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3 md:px-4 py-2 rounded-lg font-medium transition-colors ml-2">
-                    <i class="ph ph-download-simple text-lg"></i> <span class="hidden md:inline">Export (ZIP)</span>
+                    <i class="ph ph-printer text-lg"></i> <span class="hidden md:inline">Export (ZIP)</span>
                 </button>
             </div>
         </header>
@@ -297,6 +344,7 @@
             <div class="flex flex-col md:flex-row items-center gap-6">
                 
                 <div class="text-xs text-neutral-400 flex flex-col items-center md:items-end w-48">
+                    <!-- 1200 CHAR LIMIT VISUAL -->
                     <span id="char-count" class="font-bold text-neutral-200 transition-colors">0 / 1200 Chars</span>
                     <span class="opacity-70 text-blue-400 font-medium">Current Slide Capacity</span>
                 </div>
@@ -323,6 +371,7 @@
                     <button id="btn-delete" class="text-xs flex items-center gap-1 text-neutral-500 hover:text-red-400 transition-colors">
                         <i class="ph ph-trash text-sm"></i> <span id="delete-text">Remove Cover</span>
                     </button>
+                    <!-- v1.1 STAMP -->
                     <span class="text-[10px] text-neutral-600 font-mono select-none" title="Current Build Version">v1.1</span>
                 </div>
             </div>
@@ -355,7 +404,8 @@
 
     <script>
         const MAX_PAGES = 20;
-        const MAX_CHARS = 1200; // Permanently updated to 1200
+        // 1200 CHAR LIMIT LOGIC
+        const MAX_CHARS = 1200; 
         let pages = ['', '']; 
         let activePageIndex = 0;
         let coverImage = null;
@@ -394,6 +444,10 @@
         const focusSlider = document.getElementById('focus-slider');
         const zoomSlider = document.getElementById('zoom-slider');
         const btnPlacesShuffle = document.getElementById('btn-places-shuffle');
+
+        const leverModal = document.getElementById('lever-modal');
+        const leverHandle = document.getElementById('lever-handle');
+        const btnCancelPrint = document.getElementById('btn-cancel-print');
 
         const placesImages = [
             "https://i.imgur.com/5UFzerv.jpeg", "https://i.imgur.com/XCuiczb.jpeg", "https://i.imgur.com/6uJQCOC.jpeg",
@@ -646,15 +700,70 @@
             charCountDisplay.className = textLen >= MAX_CHARS ? 'font-bold text-red-400 transition-colors' : 'font-bold text-neutral-200 transition-colors';
         }
 
-        btnExport.addEventListener('click', async () => {
-            showToast('Generating 1:1 exact slides... Please wait.');
+        let isDraggingLever = false;
+        let leverStartY = 0;
+        let leverCurrentY = 0;
+        const leverTrackLength = 170; // Physical pixel distance to pull
+
+        btnExport.addEventListener('click', () => {
+            leverModal.classList.remove('hidden');
+            setTimeout(() => leverModal.classList.remove('opacity-0'), 10);
+        });
+
+        btnCancelPrint.addEventListener('click', () => {
+            leverModal.classList.add('opacity-0');
+            setTimeout(() => leverModal.classList.add('hidden'), 500);
+        });
+
+        const startDrag = (e) => {
+            isDraggingLever = true;
+            leverStartY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            leverHandle.style.transition = 'none';
+        };
+
+        const doDrag = (e) => {
+            if(!isDraggingLever) return;
+            const y = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            let delta = y - leverStartY;
+            
+            if (delta < 0) delta = 0;
+            if (delta > leverTrackLength) delta = leverTrackLength;
+            
+            leverCurrentY = delta;
+            leverHandle.style.transform = `translate(-50%, ${leverCurrentY}px)`;
+            
+            if (leverCurrentY >= leverTrackLength - 5) {
+                // TRIGGER THE MACHINE
+                isDraggingLever = false;
+                leverModal.classList.add('opacity-0');
+                setTimeout(() => leverModal.classList.add('hidden'), 500);
+                leverHandle.style.transform = `translate(-50%, 0px)`; 
+                startPrintingProcess();
+            }
+        };
+
+        const endDrag = () => {
+            if(!isDraggingLever) return;
+            isDraggingLever = false;
+            // Snap back animation
+            leverHandle.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            leverHandle.style.transform = `translate(-50%, 0px)`;
+        };
+
+        leverHandle.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', doDrag);
+        document.addEventListener('mouseup', endDrag);
+        
+        leverHandle.addEventListener('touchstart', startDrag, {passive: false});
+        document.addEventListener('touchmove', doDrag, {passive: false});
+        document.addEventListener('touchend', endDrag);
+
+        async function startPrintingProcess() {
+            showToast('The Printing Press is running...');
             btnExport.disabled = true; btnExport.classList.add('opacity-50');
             const zip = new JSZip(); 
             
-            // THE ULTIMATE WYSIWYG FIX
             const visualCanvas = document.getElementById('canvas-container');
-            
-            // This multiplier takes the exact screen box and stretches the raster output up to 1080px perfectly!
             const renderScale = 1080 / visualCanvas.clientWidth;
             
             const originalClasses = visualCanvas.className;
@@ -664,6 +773,9 @@
             
             visualCanvas.style.transition = 'none';
             visualCanvas.classList.remove('rounded-lg', 'border', 'border-neutral-800', 'shadow-2xl');
+            
+            // Turn on the machine shake
+            mainApp.classList.add('animate-print-shake');
 
             try {
                 for (let i = 0; i < pages.length; i++) {
@@ -676,7 +788,17 @@
                         editor.innerHTML = pages[i] || '';
                     }
 
-                    await new Promise(resolve => setTimeout(resolve, 150)); 
+                    // Create the physical print head scanner
+                    const scanner = document.createElement('div');
+                    scanner.className = 'print-scanner';
+                    visualCanvas.appendChild(scanner);
+
+                    // Wait for the scanner to sweep down the page (800ms)
+                    await new Promise(resolve => setTimeout(resolve, 800)); 
+                    
+                    // Briefly pause machine shake for a crystal clear HD photo
+                    mainApp.classList.remove('animate-print-shake');
+                    visualCanvas.removeChild(scanner);
 
                     const canvas = await html2canvas(visualCanvas, { 
                         scale: renderScale, 
@@ -686,6 +808,11 @@
                     
                     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
                     zip.file(`${String(i + 1).padStart(2, '0')}_slide.png`, blob);
+                    
+                    // Resume machine shake for the next page
+                    if(i < pages.length - 1) {
+                        mainApp.classList.add('animate-print-shake');
+                    }
                 }
 
                 const zipContent = await zip.generateAsync({ type: 'blob' });
@@ -693,11 +820,13 @@
                 link.href = URL.createObjectURL(zipContent);
                 link.download = 'Wifey_Story.zip'; 
                 link.click();
-                showToast('Download complete! Unzip to post.');
+                showToast('Printing complete. Files downloaded.');
             } catch (error) {
                 console.error("Export failed:", error); 
-                showToast('Export failed. See console for details.');
+                showToast('Machine jammed. See console for details.');
             } finally {
+                // Shut down the machine
+                mainApp.classList.remove('animate-print-shake');
                 visualCanvas.className = originalClasses;
                 visualCanvas.style.transition = originalTransition;
                 
@@ -713,7 +842,7 @@
                 btnExport.disabled = false; 
                 btnExport.classList.remove('opacity-50');
             }
-        });
+        }
 
         const btnDictionary = document.getElementById('btn-dictionary');
         const dictionaryPanel = document.getElementById('dictionary-panel');

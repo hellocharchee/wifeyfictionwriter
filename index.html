@@ -156,6 +156,12 @@
     <!-- WEATHER CANVAS LAYER -->
     <canvas id="weather-canvas" class="fixed inset-0 z-0 pointer-events-none opacity-0 transition-opacity duration-1000"></canvas>
 
+    <!-- YOUTUBE VIBE LAYER -->
+    <div id="yt-bg-container" class="fixed inset-0 z-0 opacity-0 pointer-events-none transition-opacity duration-1000 overflow-hidden">
+        <iframe id="yt-iframe" class="absolute top-1/2 left-1/2 w-[300vw] h-[300vh] md:w-[150vw] md:h-[150vh] -translate-x-1/2 -translate-y-1/2 pointer-events-none" src="" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-[2px]"></div>
+    </div>
+
     <!-- CLOUDS PARALLAX LAYER -->
     <div id="clouds-container" class="fixed inset-0 z-0 pointer-events-none opacity-0 transition-opacity duration-1000 overflow-hidden">
         <img src="https://i.postimg.cc/W4p8vFpr/6.png" class="cloud animate-cloud-fast w-[150vw] md:w-[130vw] top-[-15vh] opacity-90 left-0" style="animation-delay: -20s;" alt="Cloud">
@@ -194,8 +200,8 @@
         
         <div class="z-10 flex flex-col items-center text-center px-4 max-w-2xl animate-float">
             <div class="bg-[#5c341e]/40 backdrop-blur-md border border-[#8a4e2d] p-6 rounded-3xl mb-8 shadow-2xl flex items-center justify-center">
-                <!-- Static heart icon -->
-                <i class="ph-fill ph-heart text-5xl text-orange-400 drop-shadow-[0_0_15px_rgba(251,146,60,0.8)]"></i>
+                <!-- Glowing heart icon -->
+                <i class="ph-fill ph-heart text-5xl text-orange-400 animate-header-pulse"></i>
             </div>
             
             <h1 class="mb-12 flex flex-col items-center">
@@ -255,6 +261,20 @@
                 <button id="btn-weather" class="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors" title="Toggle Weather">
                     <i class="ph ph-cloud-rain text-lg"></i> <span class="hidden md:inline">Weather</span>
                 </button>
+
+                <div class="w-px h-6 bg-neutral-700 mx-1"></div>
+                
+                <!-- YOUTUBE VIBE -->
+                <div class="relative flex items-center">
+                    <button id="btn-vibe" class="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors" title="YouTube Vibe">
+                        <i class="ph ph-youtube-logo text-lg"></i> <span class="hidden md:inline">Vibe</span>
+                    </button>
+                    <div id="vibe-popover" class="hidden absolute top-full right-0 md:-right-1/2 mt-4 w-64 bg-neutral-950 border border-neutral-700 rounded-xl p-3 shadow-2xl z-50">
+                        <div class="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2">Background Video</div>
+                        <input type="text" id="vibe-input" placeholder="Paste YouTube URL..." class="w-full bg-neutral-900 border border-neutral-700 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-red-500 transition-colors placeholder-neutral-500">
+                        <p class="text-[10px] text-neutral-500 mt-2">Press Enter to play. Clear URL & Enter to stop.</p>
+                    </div>
+                </div>
 
                 <div class="w-px h-6 bg-neutral-700 mx-1"></div>
                 
@@ -445,6 +465,13 @@
         const zoomSlider = document.getElementById('zoom-slider');
         const btnPlacesShuffle = document.getElementById('btn-places-shuffle');
 
+        const btnVibe = document.getElementById('btn-vibe');
+        const vibePopover = document.getElementById('vibe-popover');
+        const vibeInput = document.getElementById('vibe-input');
+        const ytBgContainer = document.getElementById('yt-bg-container');
+        const ytIframe = document.getElementById('yt-iframe');
+        let vibeActive = false;
+
         const leverModal = document.getElementById('lever-modal');
         const leverHandle = document.getElementById('lever-handle');
         const btnCancelPrint = document.getElementById('btn-cancel-print');
@@ -518,6 +545,16 @@
         btnPlaces.addEventListener('click', () => {
             placesModeActive = !placesModeActive;
             if (placesModeActive) {
+                // TURN OFF VIBE IF ACTIVE
+                if (vibeActive) {
+                    ytBgContainer.classList.add('opacity-0');
+                    setTimeout(() => { ytIframe.src = ''; }, 1000);
+                    btnVibe.classList.remove('text-red-400');
+                    btnVibe.classList.add('text-neutral-400');
+                    vibeActive = false;
+                    vibeInput.value = '';
+                }
+
                 placesBg.style.opacity = '0'; 
                 setRandomPlace();
                 placesBgContainer.classList.remove('opacity-0', 'pointer-events-none');
@@ -540,6 +577,67 @@
         });
         focusSlider.addEventListener('input', (e) => { placesBg.style.filter = `blur(${e.target.value}px)`; });
         zoomSlider.addEventListener('input', (e) => { placesBg.style.transform = `scale(${e.target.value / 100})`; });
+
+        // YOUTUBE VIBE LOGIC
+        btnVibe.addEventListener('click', () => { vibePopover.classList.toggle('hidden'); setTimeout(() => vibeInput.focus(), 100); });
+        document.addEventListener('click', (e) => {
+            if (!btnVibe.contains(e.target) && !vibePopover.contains(e.target)) vibePopover.classList.add('hidden');
+        });
+
+        vibeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const url = vibeInput.value.trim();
+                
+                // If input is cleared, turn off vibe
+                if (!url) {
+                    ytBgContainer.classList.add('opacity-0');
+                    setTimeout(() => { ytIframe.src = ''; }, 1000);
+                    btnVibe.classList.remove('text-red-400');
+                    btnVibe.classList.add('text-neutral-400');
+                    vibeActive = false;
+                    vibePopover.classList.add('hidden');
+                    return;
+                }
+
+                // Extract YouTube ID
+                let videoId = '';
+                const ytRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|live\/)|youtu\.be\/)([^"&?\/\s]{11})/i;
+                const match = url.match(ytRegex);
+                if (match && match[1]) {
+                    videoId = match[1];
+                }
+
+                if (videoId) {
+                    // Cleanly turn off static places if it's running
+                    if (placesModeActive) {
+                        placesModeActive = false;
+                        placesBgContainer.classList.add('opacity-0', 'pointer-events-none');
+                        btnPlaces.classList.remove('text-blue-400');
+                        btnPlaces.classList.add('text-neutral-400');
+                    }
+
+                    // Load iframe with autoplay, looping, and no controls
+                    ytIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&rel=0&loop=1&playlist=${videoId}`;
+                    ytBgContainer.classList.remove('opacity-0');
+                    btnVibe.classList.add('text-red-400');
+                    btnVibe.classList.remove('text-neutral-400');
+                    vibeActive = true;
+                    vibePopover.classList.add('hidden');
+                    
+                    placesControls.classList.remove('hidden');
+                    placesControls.classList.add('flex');
+                    btnPlacesShuffle.classList.add('hidden');
+                    shuffleDivider.classList.add('hidden');
+                    
+                    ytIframe.style.filter = `blur(${focusSlider.value}px)`;
+                    ytIframe.style.transform = `translate(-50%, -50%) scale(${zoomSlider.value / 100})`;
+
+                    showToast('Vibe engaged.');
+                } else {
+                    showToast('Invalid YouTube link.');
+                }
+            }
+        });
 
         let isReverting = false;
 

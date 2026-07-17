@@ -44,6 +44,12 @@
             50% { filter: drop-shadow(0 0 15px rgba(251,146,60,1)); }
         }
 
+        /* Larger glowing heart for Splash Screen */
+        @keyframes splashPulseGlow {
+            0%, 100% { filter: drop-shadow(0 0 5px rgba(251,146,60,0.3)); }
+            50% { filter: drop-shadow(0 0 40px rgba(251,146,60,1)); }
+        }
+
         /* PRINTING PRESS EFFECTS */
         @keyframes printShake {
             0%, 100% { transform: translate(0, 0) rotate(0deg); }
@@ -60,6 +66,7 @@
 
         .animate-float { animation: float 6s ease-in-out infinite; }
         .animate-header-pulse { animation: headerPulseGlow 3s ease-in-out infinite; }
+        .animate-splash-pulse { animation: splashPulseGlow 3s ease-in-out infinite; }
         .animate-print-shake { animation: printShake 0.15s infinite; }
         
         .print-scanner {
@@ -194,8 +201,8 @@
         
         <div class="z-10 flex flex-col items-center text-center px-4 max-w-2xl animate-float">
             <div class="bg-[#5c341e]/40 backdrop-blur-md border border-[#8a4e2d] p-6 rounded-3xl mb-8 shadow-2xl flex items-center justify-center">
-                <!-- Static heart icon -->
-                <i class="ph-fill ph-heart text-5xl text-orange-400 drop-shadow-[0_0_15px_rgba(251,146,60,0.8)]"></i>
+                <!-- Glowing splash heart icon -->
+                <i class="ph-fill ph-heart text-5xl text-orange-400 animate-splash-pulse"></i>
             </div>
             
             <h1 class="mb-12 flex flex-col items-center">

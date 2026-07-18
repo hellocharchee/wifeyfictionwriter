@@ -20,6 +20,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <style>
+        /* --- Animations --- */
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-15px); }
@@ -37,20 +38,14 @@
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
         }
-        
-        /* Smooth glowing header heart (No beating/scaling) */
         @keyframes headerPulseGlow {
             0%, 100% { filter: drop-shadow(0 0 2px rgba(251,146,60,0.4)); }
             50% { filter: drop-shadow(0 0 15px rgba(251,146,60,1)); }
         }
-
-        /* Larger glowing heart for Splash Screen */
         @keyframes splashPulseGlow {
             0%, 100% { filter: drop-shadow(0 0 5px rgba(251,146,60,0.3)); }
             50% { filter: drop-shadow(0 0 40px rgba(251,146,60,1)); }
         }
-
-        /* PRINTING PRESS EFFECTS */
         @keyframes printShake {
             0%, 100% { transform: translate(0, 0) rotate(0deg); }
             25% { transform: translate(-1px, 1px) rotate(-0.5deg); }
@@ -63,7 +58,16 @@
             90% { opacity: 1; height: 4px; box-shadow: 0 0 30px 5px rgba(255,255,255,0.8); }
             100% { top: 100%; opacity: 0; }
         }
+        @keyframes driftRight {
+            0% { transform: translateX(-120%); }
+            100% { transform: translateX(120vw); }
+        }
+        @keyframes driftLeft {
+            0% { transform: translateX(120vw); }
+            100% { transform: translateX(-120%); }
+        }
 
+        /* --- Animation Utilities --- */
         .animate-float { animation: float 6s ease-in-out infinite; }
         .animate-header-pulse { animation: headerPulseGlow 3s ease-in-out infinite; }
         .animate-splash-pulse { animation: splashPulseGlow 3s ease-in-out infinite; }
@@ -82,34 +86,26 @@
             background-size: 200% 200%;
             animation: gradientPan 8s ease infinite;
         }
-
-        @keyframes driftRight {
-            0% { transform: translateX(-120%); }
-            100% { transform: translateX(120vw); }
-        }
-        @keyframes driftLeft {
-            0% { transform: translateX(120vw); }
-            100% { transform: translateX(-120%); }
-        }
         
+        /* --- Clouds --- */
         .cloud {
             position: absolute;
             max-width: none;
             will-change: transform;
             filter: brightness(0.75) contrast(1.1); 
         }
-        
         .animate-cloud-fast { animation: driftRight 45s linear infinite; }
         .animate-cloud-med { animation: driftRight 70s linear infinite; }
         .animate-cloud-med-slow { animation: driftLeft 90s linear infinite; }
         .animate-cloud-slow { animation: driftRight 130s linear infinite; }
 
+        /* --- Typography Tweaks --- */
         .fix-cursive-clip {
             text-shadow: 0px 10px 10px rgba(0,0,0,0.01);
             padding-bottom: 20px;
         }
 
-        /* Editor specific strict rules */
+        /* --- WYSIWYG Editor Strict Rules --- */
         .ig-editor { font-family: 'Inter', sans-serif; }
         .ig-editor[data-placeholder]:empty:before {
             content: attr(data-placeholder);
@@ -117,7 +113,7 @@
             cursor: text;
         }
         
-        /* Font size mappings */
+        /* Font size mappings mapped from document.execCommand */
         .ig-editor font[size="7"] { font-size: 2.5rem; line-height: 1.1; font-weight: bold; }
         .ig-editor font[size="6"] { font-size: 2rem; line-height: 1.2; font-weight: bold; }
         .ig-editor font[size="5"] { font-size: 1.5rem; line-height: 1.3; font-weight: bold; }
@@ -126,11 +122,11 @@
         .ig-editor font[size="2"] { font-size: 0.875rem; line-height: 1.5; }
         .ig-editor font[size="1"] { font-size: 0.75rem; line-height: 1.5; }
         
-        /* Strict element control inside the canvas */
+        /* Strict element control inside the canvas to prevent overflow */
         .ig-editor p, .ig-editor div { margin-bottom: 0.75em; max-width: 100% !important; }
         .ig-editor:focus { outline: none; }
         
-        /* Scrollbar hiding & Rigid Layout */
+        /* Scrollbar hiding & Rigid Layout for accurate exporting */
         .ig-editor::-webkit-scrollbar { display: none !important; }
         .ig-editor {
             -ms-overflow-style: none !important;
@@ -148,7 +144,7 @@
             word-wrap: break-word !important;
         }
 
-        /* Inset shadow for lever track */
+        /* Lever Component Styles */
         .inset-inner-shadow { box-shadow: inset 0 10px 20px rgba(0,0,0,0.8); }
     </style>
 </head>
@@ -221,7 +217,7 @@
             </button>
         </div>
 
-        <div class="absolute bottom-4 text-[#8a4e2d]/60 text-xs font-mono tracking-widest z-10 pointer-events-none select-none">v1.1</div>
+        <div class="absolute bottom-4 text-[#8a4e2d]/60 text-xs font-mono tracking-widest z-10 pointer-events-none select-none">v1.6</div>
     </div>
 
     <!-- MAIN APP WRAPPER -->
@@ -239,7 +235,7 @@
                     <button id="btn-places-shuffle" class="text-neutral-400 hover:text-white transition-colors flex items-center justify-center p-1" title="Randomize Place">
                         <i class="ph ph-shuffle text-lg"></i>
                     </button>
-                    <div class="w-px h-5 bg-neutral-700 mx-1"></div>
+                    <div id="shuffle-divider" class="w-px h-5 bg-neutral-700 mx-1"></div>
                     <i class="ph ph-aperture text-neutral-400" title="Focus Knob"></i>
                     <input type="range" id="focus-slider" min="0" max="20" value="8" class="w-16 md:w-20 accent-blue-500 cursor-pointer" title="Adjust Background Blur">
                     <div class="w-px h-5 bg-neutral-700 mx-1"></div>
@@ -378,8 +374,8 @@
                     <button id="btn-delete" class="text-xs flex items-center gap-1 text-neutral-500 hover:text-red-400 transition-colors">
                         <i class="ph ph-trash text-sm"></i> <span id="delete-text">Remove Cover</span>
                     </button>
-                    <!-- v1.1 STAMP -->
-                    <span class="text-[10px] text-neutral-600 font-mono select-none" title="Current Build Version">v1.1</span>
+                    <!-- VERSION STAMP -->
+                    <span class="text-[10px] text-neutral-600 font-mono select-none" title="Current Build Version">v1.6</span>
                 </div>
             </div>
         </footer>
@@ -405,32 +401,38 @@
         </div>
     </div>
 
+    <!-- TOAST NOTIFICATION -->
     <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg text-sm font-medium transition-all duration-300 transform translate-y-20 opacity-0 z-50 flex items-center gap-2 pointer-events-none text-center">
         <i class="ph ph-info text-lg shrink-0"></i> <span id="toast-msg"></span>
     </div>
 
     <script>
+        /* --- STATE VARIABLES --- */
         const MAX_PAGES = 20;
-        // 1200 CHAR LIMIT LOGIC
         const MAX_CHARS = 1200; 
         let pages = ['', '']; 
         let activePageIndex = 0;
         let coverImage = null;
         let theme = 'dark';
         let placesModeActive = false;
+        let isReverting = false;
 
+        /* --- DOM ELEMENTS --- */
         const splashScreen = document.getElementById('splash-screen');
         const mainApp = document.getElementById('main-app');
         const btnStart = document.getElementById('btn-start');
+        
+        // Main Editor Elements
         const coverView = document.getElementById('cover-view');
         const textView = document.getElementById('text-view');
         const editor = document.getElementById('editor');
         const toolbar = document.getElementById('toolbar');
         const canvasContainer = document.getElementById('canvas-container');
-        
         const coverUploadInput = document.getElementById('cover-upload-input');
         const coverImagePreview = document.getElementById('cover-image-preview');
         const coverUploadLabel = document.getElementById('cover-upload-label');
+        
+        // Navigation & Actions
         const pageIndicator = document.getElementById('page-indicator');
         const btnPrev = document.getElementById('btn-prev');
         const btnNext = document.getElementById('btn-next');
@@ -442,8 +444,11 @@
         const btnTheme = document.getElementById('btn-theme');
         const btnExport = document.getElementById('btn-export');
         const charCountDisplay = document.getElementById('char-count');
+        const btnHardcore = document.getElementById('btn-hardcore');
         const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toast-msg');
         
+        // Background & Places Elements
         const btnPlaces = document.getElementById('btn-places');
         const placesBgContainer = document.getElementById('places-bg-container');
         const placesBg = document.getElementById('places-bg');
@@ -452,10 +457,28 @@
         const zoomSlider = document.getElementById('zoom-slider');
         const btnPlacesShuffle = document.getElementById('btn-places-shuffle');
 
+        // Printing Press Elements
         const leverModal = document.getElementById('lever-modal');
         const leverHandle = document.getElementById('lever-handle');
         const btnCancelPrint = document.getElementById('btn-cancel-print');
 
+        // Weather Elements
+        const btnWeather = document.getElementById('btn-weather');
+        const weatherCanvas = document.getElementById('weather-canvas');
+        const cloudsContainer = document.getElementById('clouds-container');
+        const ctxWeather = weatherCanvas.getContext('2d');
+        let weatherActive = false;
+        let rainDrops = [];
+        let rainAnimationId;
+
+        // Dictionary Elements
+        const btnDictionary = document.getElementById('btn-dictionary');
+        const dictionaryPanel = document.getElementById('dictionary-panel');
+        const btnCloseDict = document.getElementById('btn-close-dict');
+        const dictSearchInput = document.getElementById('dict-search-input');
+        const dictResults = document.getElementById('dict-results');
+
+        // Places Database
         const placesImages = [
             "https://i.imgur.com/5UFzerv.jpeg", "https://i.imgur.com/XCuiczb.jpeg", "https://i.imgur.com/6uJQCOC.jpeg",
             "https://i.imgur.com/anqxLvU.jpeg", "https://i.imgur.com/UMnOm10.jpeg", "https://i.imgur.com/m0j7Wod.jpeg",
@@ -477,6 +500,207 @@
             "https://i.imgur.com/vVvgPrF.jpeg", "https://i.imgur.com/n0NU3wp.jpeg"
         ];
 
+        /* --- STREAMING_CHUNK:Core Setup and Utility Functions... --- */
+        // Global UI Notification System
+        function showToast(msg) {
+            toastMsg.textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0', 'bg-blue-600', 'bg-red-600', 'bg-emerald-600');
+            
+            if(msg.includes("limit") || msg.includes("full") || msg.includes("Boundary") || msg.includes("overflow")) {
+                toast.classList.add('bg-red-600');
+            } else {
+                toast.classList.add('bg-blue-600');
+            }
+            setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 4000);
+        }
+
+        // Boot Sequence
+        btnStart.addEventListener('click', () => {
+            splashScreen.classList.add('opacity-0');
+            setTimeout(() => {
+                splashScreen.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                mainApp.classList.add('flex');
+                updateUI();
+            }, 700);
+        });
+
+        // Hardcore Mode (Placeholder)
+        btnHardcore.addEventListener('click', () => { 
+            showToast('⚡ Hardcore Mode is coming soon! Prepare yourself.'); 
+        });
+
+        // Formatting Helpers
+        function applyCommand(command, value = null) {
+            document.execCommand(command, false, value);
+            if (editor.scrollHeight > editor.clientHeight + 2 || editor.textContent.length > MAX_CHARS) {
+                document.execCommand('undo');
+                showToast("Formatting blocked: Text exceeds slide boundaries!");
+            } else {
+                saveContent();
+            }
+            editor.focus();
+        }
+        function applyFont(fontName) { applyCommand('fontName', fontName); fontMenu.classList.add('hidden'); }
+        function applySize(size) { applyCommand('fontSize', size); }
+
+        /* --- STREAMING_CHUNK:Editor Logic & Overflow Protections... --- */
+        // Smart Paste: Limits text gracefully to avoid layout destruction
+        editor.addEventListener('paste', (e) => {
+            e.preventDefault();
+            let html = e.clipboardData.getData('text/html');
+            let text = e.clipboardData.getData('text/plain');
+            
+            // Clean up pasted formatting
+            if (html) {
+                html = html.replace(/&nbsp;/g, ' ').replace(/\u00A0/g, ' '); 
+                let temp = document.createElement('div');
+                temp.innerHTML = html;
+                const elements = temp.querySelectorAll("*");
+                elements.forEach(el => {
+                    el.removeAttribute('style'); el.removeAttribute('class'); el.removeAttribute('id');
+                    el.removeAttribute('width'); el.removeAttribute('height');
+                });
+                text = temp.textContent || temp.innerText || "";
+            } else {
+                text = text.replace(/\u00A0/g, ' ');
+            }
+            
+            isReverting = true; 
+            let currentLen = editor.textContent.length;
+            let availableChars = MAX_CHARS - currentLen;
+            
+            if (availableChars <= 0) {
+                showToast("Slide is full. Paste on the next slide.");
+                isReverting = false; return;
+            }
+
+            // Binary search to find exactly how much pasted text fits in the physical box
+            let words = text.split(/(\s+)/); 
+            let low = 0; let high = words.length; let bestFitIndex = 0;
+            
+            while (low <= high) {
+                let mid = Math.floor((low + high) / 2);
+                let attempt = words.slice(0, mid).join('');
+                document.execCommand('insertText', false, attempt);
+                
+                if (editor.scrollHeight <= editor.clientHeight + 2 && editor.textContent.length <= MAX_CHARS) {
+                    bestFitIndex = mid; low = mid + 1; 
+                } else {
+                    high = mid - 1; 
+                }
+                document.execCommand('undo');
+            }
+            
+            // Apply the safe amount
+            let finalString = words.slice(0, bestFitIndex).join('');
+            document.execCommand('insertText', false, finalString);
+            isReverting = false;
+            editor.dispatchEvent(new Event('input'));
+            
+            if (bestFitIndex < words.length) showToast(`Boundary hit! Copied ${finalString.length} chars. Paste remainder on next slide.`);
+        });
+
+        // Keyboard Limit Protection
+        editor.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' || e.key === 'Delete' || e.ctrlKey || e.metaKey || e.key.includes('Arrow')) return;
+            if (editor.textContent.length >= MAX_CHARS) {
+                e.preventDefault(); showToast(`${MAX_CHARS} Character limit reached.`); return;
+            }
+            if (editor.scrollHeight > editor.clientHeight + 2) {
+                e.preventDefault(); showToast("Physical slide bottom reached.");
+            }
+        });
+
+        // Typing Monitor
+        editor.addEventListener('input', (e) => {
+            if (isReverting) return; 
+            if (editor.scrollHeight > editor.clientHeight + 2 || editor.textContent.length > MAX_CHARS) {
+                isReverting = true; document.execCommand('undo'); 
+                showToast("Slide capacity reached."); isReverting = false;
+            } else {
+                saveContent(); updateCharCount();
+            }
+        });
+
+        function saveContent() { if (activePageIndex > 0) pages[activePageIndex] = editor.innerHTML; }
+
+        // Font Menu Toggle
+        fontMenuBtn.addEventListener('click', () => fontMenu.classList.toggle('hidden'));
+        document.addEventListener('click', (e) => {
+            if (!fontMenuBtn.contains(e.target) && !fontMenu.contains(e.target)) fontMenu.classList.add('hidden');
+        });
+
+        /* --- STREAMING_CHUNK:Slide Navigation and UI Updates... --- */
+        btnPrev.addEventListener('click', () => { if (activePageIndex > 0) { activePageIndex--; updateUI(); }});
+        btnNext.addEventListener('click', () => { if (activePageIndex < pages.length - 1) { activePageIndex++; updateUI(); }});
+        
+        btnAdd.addEventListener('click', () => {
+            if (pages.length >= MAX_PAGES) { showToast('Maximum of 20 slides reached!'); return; }
+            pages.push(''); activePageIndex = pages.length - 1; updateUI();
+        });
+
+        btnDelete.addEventListener('click', () => {
+            if (activePageIndex === 0) {
+                coverImage = null; coverImagePreview.src = ''; coverImagePreview.classList.add('hidden');
+                coverUploadLabel.classList.remove('opacity-0', 'hover:opacity-100');
+                coverUploadLabel.classList.add('bg-neutral-900/80');
+            } else {
+                if (pages.length === 2) pages[1] = '';
+                else { pages.splice(activePageIndex, 1); activePageIndex--; }
+            }
+            updateUI();
+        });
+
+        // Cover Upload Handle
+        coverUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    coverImage = reader.result; coverImagePreview.src = coverImage; coverImagePreview.classList.remove('hidden');
+                    coverUploadLabel.classList.remove('bg-neutral-900/80'); coverUploadLabel.classList.add('opacity-0', 'hover:opacity-100');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Canvas Theme Toggle
+        btnTheme.addEventListener('click', () => {
+            theme = theme === 'dark' ? 'light' : 'dark';
+            if (theme === 'light') {
+                canvasContainer.classList.remove('bg-[#121212]', 'text-white'); canvasContainer.classList.add('bg-white', 'text-black');
+            } else {
+                canvasContainer.classList.remove('bg-white', 'text-black'); canvasContainer.classList.add('bg-[#121212]', 'text-white');
+            }
+        });
+
+        // Master UI Sync
+        function updateUI() {
+            if (activePageIndex === 0) {
+                pageIndicator.textContent = 'Cover Slide'; coverView.classList.remove('hidden'); textView.classList.add('hidden');
+                toolbar.classList.add('hidden'); deleteText.textContent = 'Remove Cover';
+                charCountDisplay.textContent = `0 / ${MAX_CHARS} Chars`;
+                charCountDisplay.className = 'font-bold text-neutral-200 transition-colors';
+            } else {
+                pageIndicator.textContent = `Slide ${activePageIndex} of ${pages.length - 1}`;
+                coverView.classList.add('hidden'); textView.classList.remove('hidden');
+                toolbar.classList.remove('hidden'); toolbar.classList.add('flex');
+                editor.innerHTML = pages[activePageIndex] || ''; deleteText.textContent = 'Clear Slide';
+                updateCharCount();
+            }
+            btnPrev.disabled = activePageIndex === 0; btnNext.disabled = activePageIndex === pages.length - 1; btnAdd.disabled = pages.length >= MAX_PAGES;
+        }
+
+        function updateCharCount() {
+            if (activePageIndex === 0) return;
+            const textLen = editor.textContent.length;
+            charCountDisplay.textContent = `${textLen} / ${MAX_CHARS} Chars`;
+            charCountDisplay.className = textLen >= MAX_CHARS ? 'font-bold text-red-400 transition-colors' : 'font-bold text-neutral-200 transition-colors';
+        }
+
+        /* --- STREAMING_CHUNK:Environment & Background Controls... --- */
+        // Places Logic
         function setRandomPlace() {
             if (placesImages.length === 0) return;
             const randomIndex = Math.floor(Math.random() * placesImages.length);
@@ -484,7 +708,7 @@
             
             const tempImg = new Image();
             tempImg.onload = () => {
-                if (tempImg.width === 161) {
+                if (tempImg.width === 161) { // Filter out dead Imgur links
                     placesImages.splice(randomIndex, 1);
                     setRandomPlace(); 
                     return;
@@ -497,29 +721,6 @@
                 setRandomPlace(); 
             };
             tempImg.src = imgUrl;
-        }
-
-        btnStart.addEventListener('click', () => {
-            splashScreen.classList.add('opacity-0');
-            setTimeout(() => {
-                splashScreen.classList.add('hidden');
-                mainApp.classList.remove('hidden');
-                mainApp.classList.add('flex');
-                updateUI();
-            }, 700);
-        });
-
-        function showToast(msg) {
-            const toastMsg = document.getElementById('toast-msg');
-            toastMsg.textContent = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0', 'bg-blue-600', 'bg-red-600', 'bg-emerald-600');
-            
-            if(msg.includes("limit") || msg.includes("full") || msg.includes("Boundary") || msg.includes("overflow")) {
-                toast.classList.add('bg-red-600');
-            } else {
-                toast.classList.add('bg-blue-600');
-            }
-            setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 4000);
         }
 
         btnPlaces.addEventListener('click', () => {
@@ -545,362 +746,15 @@
             placesBg.style.opacity = '0';
             setTimeout(() => { setRandomPlace(); }, 300);
         });
-        focusSlider.addEventListener('input', (e) => { placesBg.style.filter = `blur(${e.target.value}px)`; });
-        zoomSlider.addEventListener('input', (e) => { placesBg.style.transform = `scale(${e.target.value / 100})`; });
-
-        let isReverting = false;
-
-        function applyCommand(command, value = null) {
-            document.execCommand(command, false, value);
-            if (editor.scrollHeight > editor.clientHeight + 2 || editor.textContent.length > MAX_CHARS) {
-                document.execCommand('undo');
-                showToast("Formatting blocked: Text exceeds slide boundaries!");
-            } else {
-                saveContent();
-            }
-            editor.focus();
-        }
-
-        editor.addEventListener('paste', (e) => {
-            e.preventDefault();
-            let html = e.clipboardData.getData('text/html');
-            let text = e.clipboardData.getData('text/plain');
-            
-            if (html) {
-                html = html.replace(/&nbsp;/g, ' ').replace(/\u00A0/g, ' '); 
-                let temp = document.createElement('div');
-                temp.innerHTML = html;
-                const elements = temp.querySelectorAll("*");
-                elements.forEach(el => {
-                    el.removeAttribute('style'); el.removeAttribute('class'); el.removeAttribute('id');
-                    el.removeAttribute('width'); el.removeAttribute('height');
-                });
-                text = temp.textContent || temp.innerText || "";
-            } else {
-                text = text.replace(/\u00A0/g, ' ');
-            }
-            
-            isReverting = true; 
-            let currentLen = editor.textContent.length;
-            let availableChars = MAX_CHARS - currentLen;
-            
-            if (availableChars <= 0) {
-                showToast("Slide is full. Paste on the next slide.");
-                isReverting = false; return;
-            }
-
-            let words = text.split(/(\s+)/); 
-            let low = 0; let high = words.length; let bestFitIndex = 0;
-            
-            while (low <= high) {
-                let mid = Math.floor((low + high) / 2);
-                let attempt = words.slice(0, mid).join('');
-                document.execCommand('insertText', false, attempt);
-                
-                if (editor.scrollHeight <= editor.clientHeight + 2 && editor.textContent.length <= MAX_CHARS) {
-                    bestFitIndex = mid; low = mid + 1; 
-                } else {
-                    high = mid - 1; 
-                }
-                document.execCommand('undo');
-            }
-            
-            let finalString = words.slice(0, bestFitIndex).join('');
-            document.execCommand('insertText', false, finalString);
-            isReverting = false;
-            editor.dispatchEvent(new Event('input'));
-            
-            if (bestFitIndex < words.length) showToast(`Boundary hit! Copied ${finalString.length} chars. Paste remainder on next slide.`);
-        });
-
-        editor.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace' || e.key === 'Delete' || e.ctrlKey || e.metaKey || e.key.includes('Arrow')) return;
-            if (editor.textContent.length >= MAX_CHARS) {
-                e.preventDefault(); showToast(`${MAX_CHARS} Character limit reached.`); return;
-            }
-            if (editor.scrollHeight > editor.clientHeight + 2) {
-                e.preventDefault(); showToast("Physical slide bottom reached.");
-            }
-        });
-
-        editor.addEventListener('input', (e) => {
-            if (isReverting) return; 
-            if (editor.scrollHeight > editor.clientHeight + 2 || editor.textContent.length > MAX_CHARS) {
-                isReverting = true; document.execCommand('undo'); 
-                showToast("Slide capacity reached."); isReverting = false;
-            } else {
-                saveContent(); updateCharCount();
-            }
-        });
-
-        function saveContent() { if (activePageIndex > 0) pages[activePageIndex] = editor.innerHTML; }
-
-        fontMenuBtn.addEventListener('click', () => fontMenu.classList.toggle('hidden'));
-        document.addEventListener('click', (e) => {
-            if (!fontMenuBtn.contains(e.target) && !fontMenu.contains(e.target)) fontMenu.classList.add('hidden');
-        });
-
-        function applyFont(fontName) { applyCommand('fontName', fontName); fontMenu.classList.add('hidden'); }
-        function applySize(size) { applyCommand('fontSize', size); }
-
-        btnPrev.addEventListener('click', () => { if (activePageIndex > 0) { activePageIndex--; updateUI(); }});
-        btnNext.addEventListener('click', () => { if (activePageIndex < pages.length - 1) { activePageIndex++; updateUI(); }});
         
-        btnAdd.addEventListener('click', () => {
-            if (pages.length >= MAX_PAGES) { showToast('Maximum of 20 slides reached!'); return; }
-            pages.push(''); activePageIndex = pages.length - 1; updateUI();
+        focusSlider.addEventListener('input', (e) => { 
+            placesBg.style.filter = `blur(${e.target.value}px)`; 
+        });
+        zoomSlider.addEventListener('input', (e) => { 
+            placesBg.style.transform = `scale(${e.target.value / 100})`; 
         });
 
-        btnDelete.addEventListener('click', () => {
-            if (activePageIndex === 0) {
-                coverImage = null; coverImagePreview.src = ''; coverImagePreview.classList.add('hidden');
-                coverUploadLabel.classList.remove('opacity-0', 'hover:opacity-100');
-                coverUploadLabel.classList.add('bg-neutral-900/80');
-            } else {
-                if (pages.length === 2) pages[1] = '';
-                else { pages.splice(activePageIndex, 1); activePageIndex--; }
-            }
-            updateUI();
-        });
-
-        coverUploadInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    coverImage = reader.result; coverImagePreview.src = coverImage; coverImagePreview.classList.remove('hidden');
-                    coverUploadLabel.classList.remove('bg-neutral-900/80'); coverUploadLabel.classList.add('opacity-0', 'hover:opacity-100');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        btnTheme.addEventListener('click', () => {
-            theme = theme === 'dark' ? 'light' : 'dark';
-            if (theme === 'light') {
-                canvasContainer.classList.remove('bg-[#121212]', 'text-white'); canvasContainer.classList.add('bg-white', 'text-black');
-            } else {
-                canvasContainer.classList.remove('bg-white', 'text-black'); canvasContainer.classList.add('bg-[#121212]', 'text-white');
-            }
-        });
-
-        function updateUI() {
-            if (activePageIndex === 0) {
-                pageIndicator.textContent = 'Cover Slide'; coverView.classList.remove('hidden'); textView.classList.add('hidden');
-                toolbar.classList.add('hidden'); deleteText.textContent = 'Remove Cover';
-                charCountDisplay.textContent = `0 / ${MAX_CHARS} Chars`;
-                charCountDisplay.className = 'font-bold text-neutral-200 transition-colors';
-            } else {
-                pageIndicator.textContent = `Slide ${activePageIndex} of ${pages.length - 1}`;
-                coverView.classList.add('hidden'); textView.classList.remove('hidden');
-                toolbar.classList.remove('hidden'); toolbar.classList.add('flex');
-                editor.innerHTML = pages[activePageIndex] || ''; deleteText.textContent = 'Clear Slide';
-                updateCharCount();
-            }
-            btnPrev.disabled = activePageIndex === 0; btnNext.disabled = activePageIndex === pages.length - 1; btnAdd.disabled = pages.length >= MAX_PAGES;
-        }
-
-        function updateCharCount() {
-            if (activePageIndex === 0) return;
-            const textLen = editor.textContent.length;
-            charCountDisplay.textContent = `${textLen} / ${MAX_CHARS} Chars`;
-            charCountDisplay.className = textLen >= MAX_CHARS ? 'font-bold text-red-400 transition-colors' : 'font-bold text-neutral-200 transition-colors';
-        }
-
-        let isDraggingLever = false;
-        let leverStartY = 0;
-        let leverCurrentY = 0;
-        const leverTrackLength = 170; // Physical pixel distance to pull
-
-        btnExport.addEventListener('click', () => {
-            leverModal.classList.remove('hidden');
-            setTimeout(() => leverModal.classList.remove('opacity-0'), 10);
-        });
-
-        btnCancelPrint.addEventListener('click', () => {
-            leverModal.classList.add('opacity-0');
-            setTimeout(() => leverModal.classList.add('hidden'), 500);
-        });
-
-        const startDrag = (e) => {
-            isDraggingLever = true;
-            leverStartY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-            leverHandle.style.transition = 'none';
-        };
-
-        const doDrag = (e) => {
-            if(!isDraggingLever) return;
-            const y = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-            let delta = y - leverStartY;
-            
-            if (delta < 0) delta = 0;
-            if (delta > leverTrackLength) delta = leverTrackLength;
-            
-            leverCurrentY = delta;
-            leverHandle.style.transform = `translate(-50%, ${leverCurrentY}px)`;
-            
-            if (leverCurrentY >= leverTrackLength - 5) {
-                // TRIGGER THE MACHINE
-                isDraggingLever = false;
-                leverModal.classList.add('opacity-0');
-                setTimeout(() => leverModal.classList.add('hidden'), 500);
-                leverHandle.style.transform = `translate(-50%, 0px)`; 
-                startPrintingProcess();
-            }
-        };
-
-        const endDrag = () => {
-            if(!isDraggingLever) return;
-            isDraggingLever = false;
-            // Snap back animation
-            leverHandle.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-            leverHandle.style.transform = `translate(-50%, 0px)`;
-        };
-
-        leverHandle.addEventListener('mousedown', startDrag);
-        document.addEventListener('mousemove', doDrag);
-        document.addEventListener('mouseup', endDrag);
-        
-        leverHandle.addEventListener('touchstart', startDrag, {passive: false});
-        document.addEventListener('touchmove', doDrag, {passive: false});
-        document.addEventListener('touchend', endDrag);
-
-        async function startPrintingProcess() {
-            showToast('The Printing Press is running...');
-            btnExport.disabled = true; btnExport.classList.add('opacity-50');
-            const zip = new JSZip(); 
-            
-            const visualCanvas = document.getElementById('canvas-container');
-            const renderScale = 1080 / visualCanvas.clientWidth;
-            
-            const originalClasses = visualCanvas.className;
-            const originalTransition = visualCanvas.style.transition;
-            const originalPageIndex = activePageIndex;
-            const originalEditorHtml = editor.innerHTML;
-            
-            visualCanvas.style.transition = 'none';
-            visualCanvas.classList.remove('rounded-lg', 'border', 'border-neutral-800', 'shadow-2xl');
-            
-            // Turn on the machine shake
-            mainApp.classList.add('animate-print-shake');
-
-            try {
-                for (let i = 0; i < pages.length; i++) {
-                    if (i === 0) {
-                        textView.classList.add('hidden');
-                        coverView.classList.remove('hidden');
-                    } else {
-                        coverView.classList.add('hidden');
-                        textView.classList.remove('hidden');
-                        editor.innerHTML = pages[i] || '';
-                    }
-
-                    // Create the physical print head scanner
-                    const scanner = document.createElement('div');
-                    scanner.className = 'print-scanner';
-                    visualCanvas.appendChild(scanner);
-
-                    // Wait for the scanner to sweep down the page (800ms)
-                    await new Promise(resolve => setTimeout(resolve, 800)); 
-                    
-                    // Briefly pause machine shake for a crystal clear HD photo
-                    mainApp.classList.remove('animate-print-shake');
-                    visualCanvas.removeChild(scanner);
-
-                    const canvas = await html2canvas(visualCanvas, { 
-                        scale: renderScale, 
-                        useCORS: true, 
-                        backgroundColor: theme === 'light' ? '#ffffff' : '#121212'
-                    });
-                    
-                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-                    zip.file(`${String(i + 1).padStart(2, '0')}_slide.png`, blob);
-                    
-                    // Resume machine shake for the next page
-                    if(i < pages.length - 1) {
-                        mainApp.classList.add('animate-print-shake');
-                    }
-                }
-
-                const zipContent = await zip.generateAsync({ type: 'blob' });
-                const link = document.createElement('a'); 
-                link.href = URL.createObjectURL(zipContent);
-                link.download = 'Wifey_Story.zip'; 
-                link.click();
-                showToast('Printing complete. Files downloaded.');
-            } catch (error) {
-                console.error("Export failed:", error); 
-                showToast('Machine jammed. See console for details.');
-            } finally {
-                // Shut down the machine
-                mainApp.classList.remove('animate-print-shake');
-                visualCanvas.className = originalClasses;
-                visualCanvas.style.transition = originalTransition;
-                
-                if (originalPageIndex === 0) {
-                    textView.classList.add('hidden');
-                    coverView.classList.remove('hidden');
-                } else {
-                    coverView.classList.add('hidden');
-                    textView.classList.remove('hidden');
-                }
-                editor.innerHTML = originalEditorHtml;
-                
-                btnExport.disabled = false; 
-                btnExport.classList.remove('opacity-50');
-            }
-        }
-
-        const btnDictionary = document.getElementById('btn-dictionary');
-        const dictionaryPanel = document.getElementById('dictionary-panel');
-        const btnCloseDict = document.getElementById('btn-close-dict');
-        const dictSearchInput = document.getElementById('dict-search-input');
-        const dictResults = document.getElementById('dict-results');
-        const btnHardcore = document.getElementById('btn-hardcore');
-
-        btnHardcore.addEventListener('click', () => { showToast('⚡ Hardcore Mode is coming soon! Prepare yourself.'); });
-        btnDictionary.addEventListener('click', () => { dictionaryPanel.classList.remove('translate-x-full'); setTimeout(() => dictSearchInput.focus(), 100); });
-        btnCloseDict.addEventListener('click', () => { dictionaryPanel.classList.add('translate-x-full'); });
-
-        dictSearchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') { const word = dictSearchInput.value.trim(); if (word) fetchDefinition(word); }
-        });
-
-        async function fetchDefinition(word) {
-            dictResults.innerHTML = `<div class="text-center text-neutral-400 mt-10"><i class="ph ph-spinner animate-spin text-4xl mb-3 text-blue-500"></i><p>Searching the archives...</p></div>`;
-            try {
-                const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-                if (!response.ok) throw new Error('Word not found');
-                const data = await response.json(); const entry = data[0];
-                let html = `<div class="mb-2 border-b border-neutral-800 pb-4"><h3 class="text-3xl font-extrabold text-white tracking-tight">${entry.word}</h3>${entry.phonetic ? `<p class="text-blue-400 font-medium text-lg mt-1">${entry.phonetic}</p>` : ''}</div>`;
-                
-                entry.meanings.forEach(meaning => {
-                    html += `<div class="mb-4"><div class="inline-block px-2 py-1 bg-neutral-800 text-xs font-bold uppercase tracking-wider text-neutral-300 rounded mb-3">${meaning.partOfSpeech}</div><ul class="list-disc pl-5 text-neutral-300 space-y-3">`;
-                    meaning.definitions.slice(0, 4).forEach(def => {
-                        html += `<li><span class="text-neutral-200">${def.definition}</span>`;
-                        if (def.example) html += `<br><span class="text-neutral-500 italic text-sm mt-1 block">"${def.example}"</span>`;
-                        html += `</li>`;
-                    });
-                    html += `</ul>`;
-                    if (meaning.synonyms && meaning.synonyms.length > 0) {
-                        html += `<div class="mt-4 text-sm bg-neutral-900 p-3 rounded-lg border border-neutral-800"><span class="text-neutral-500 font-medium">Synonyms: </span><span class="text-blue-400">${meaning.synonyms.slice(0, 6).join(', ')}</span></div>`;
-                    }
-                    html += `</div>`;
-                });
-                dictResults.innerHTML = html;
-            } catch (error) {
-                dictResults.innerHTML = `<div class="text-center text-neutral-500 mt-10"><i class="ph ph-warning-circle text-5xl mb-3 text-red-400 opacity-80"></i><p>We couldn't find a definition for "<span class="text-white">${word}</span>".</p><p class="text-sm mt-2 opacity-70">Check your spelling or try another word.</p></div>`;
-            }
-        }
-
-        const btnWeather = document.getElementById('btn-weather');
-        const weatherCanvas = document.getElementById('weather-canvas');
-        const cloudsContainer = document.getElementById('clouds-container');
-        const ctxWeather = weatherCanvas.getContext('2d');
-        let weatherActive = false;
-        let rainDrops = [];
-        let rainAnimationId;
-
+        // Weather Logic
         function resizeWeatherCanvas() {
             weatherCanvas.width = window.innerWidth;
             weatherCanvas.height = window.innerHeight;
@@ -963,6 +817,196 @@
                 setTimeout(() => { if (!weatherActive) cancelAnimationFrame(rainAnimationId); }, 1000);
             }
         });
+
+        /* --- STREAMING_CHUNK:Dictionary API Integration... --- */
+        btnDictionary.addEventListener('click', () => { dictionaryPanel.classList.remove('translate-x-full'); setTimeout(() => dictSearchInput.focus(), 100); });
+        btnCloseDict.addEventListener('click', () => { dictionaryPanel.classList.add('translate-x-full'); });
+
+        dictSearchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') { const word = dictSearchInput.value.trim(); if (word) fetchDefinition(word); }
+        });
+
+        async function fetchDefinition(word) {
+            dictResults.innerHTML = `<div class="text-center text-neutral-400 mt-10"><i class="ph ph-spinner animate-spin text-4xl mb-3 text-blue-500"></i><p>Searching the archives...</p></div>`;
+            try {
+                const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                if (!response.ok) throw new Error('Word not found');
+                const data = await response.json(); const entry = data[0];
+                let html = `<div class="mb-2 border-b border-neutral-800 pb-4"><h3 class="text-3xl font-extrabold text-white tracking-tight">${entry.word}</h3>${entry.phonetic ? `<p class="text-blue-400 font-medium text-lg mt-1">${entry.phonetic}</p>` : ''}</div>`;
+                
+                entry.meanings.forEach(meaning => {
+                    html += `<div class="mb-4"><div class="inline-block px-2 py-1 bg-neutral-800 text-xs font-bold uppercase tracking-wider text-neutral-300 rounded mb-3">${meaning.partOfSpeech}</div><ul class="list-disc pl-5 text-neutral-300 space-y-3">`;
+                    meaning.definitions.slice(0, 4).forEach(def => {
+                        html += `<li><span class="text-neutral-200">${def.definition}</span>`;
+                        if (def.example) html += `<br><span class="text-neutral-500 italic text-sm mt-1 block">"${def.example}"</span>`;
+                        html += `</li>`;
+                    });
+                    html += `</ul>`;
+                    if (meaning.synonyms && meaning.synonyms.length > 0) {
+                        html += `<div class="mt-4 text-sm bg-neutral-900 p-3 rounded-lg border border-neutral-800"><span class="text-neutral-500 font-medium">Synonyms: </span><span class="text-blue-400">${meaning.synonyms.slice(0, 6).join(', ')}</span></div>`;
+                    }
+                    html += `</div>`;
+                });
+                dictResults.innerHTML = html;
+            } catch (error) {
+                dictResults.innerHTML = `<div class="text-center text-neutral-500 mt-10"><i class="ph ph-warning-circle text-5xl mb-3 text-red-400 opacity-80"></i><p>We couldn't find a definition for "<span class="text-white">${word}</span>".</p><p class="text-sm mt-2 opacity-70">Check your spelling or try another word.</p></div>`;
+            }
+        }
+
+        /* --- STREAMING_CHUNK:Printing Press Export Sequence... --- */
+        let isDraggingLever = false;
+        let leverStartY = 0;
+        let leverCurrentY = 0;
+        const leverTrackLength = 170; // Physical pixel distance to pull
+
+        // Open Lever Modal
+        btnExport.addEventListener('click', () => {
+            leverModal.classList.remove('hidden');
+            setTimeout(() => leverModal.classList.remove('opacity-0'), 10);
+        });
+
+        // Close Lever Modal
+        btnCancelPrint.addEventListener('click', () => {
+            leverModal.classList.add('opacity-0');
+            setTimeout(() => leverModal.classList.add('hidden'), 500);
+        });
+
+        // Lever Drag Mechanics
+        const startDrag = (e) => {
+            isDraggingLever = true;
+            leverStartY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            leverHandle.style.transition = 'none';
+        };
+
+        const doDrag = (e) => {
+            if(!isDraggingLever) return;
+            const y = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            let delta = y - leverStartY;
+            
+            if (delta < 0) delta = 0;
+            if (delta > leverTrackLength) delta = leverTrackLength;
+            
+            leverCurrentY = delta;
+            leverHandle.style.transform = `translate(-50%, ${leverCurrentY}px)`;
+            
+            if (leverCurrentY >= leverTrackLength - 5) {
+                // TRIGGER THE MACHINE
+                isDraggingLever = false;
+                leverModal.classList.add('opacity-0');
+                setTimeout(() => leverModal.classList.add('hidden'), 500);
+                leverHandle.style.transform = `translate(-50%, 0px)`; 
+                startPrintingProcess();
+            }
+        };
+
+        const endDrag = () => {
+            if(!isDraggingLever) return;
+            isDraggingLever = false;
+            // Snap back animation if not fully pulled
+            leverHandle.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            leverHandle.style.transform = `translate(-50%, 0px)`;
+        };
+
+        // Bind Lever Events (Mouse & Touch)
+        leverHandle.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', doDrag);
+        document.addEventListener('mouseup', endDrag);
+        
+        leverHandle.addEventListener('touchstart', startDrag, {passive: false});
+        document.addEventListener('touchmove', doDrag, {passive: false});
+        document.addEventListener('touchend', endDrag);
+
+        // Core 1:1 WYSIWYG Export Engine
+        async function startPrintingProcess() {
+            showToast('The Printing Press is running...');
+            btnExport.disabled = true; btnExport.classList.add('opacity-50');
+            const zip = new JSZip(); 
+            
+            const visualCanvas = document.getElementById('canvas-container');
+            const renderScale = 1080 / visualCanvas.clientWidth; // Scales physical box to 1080p
+            
+            // Store original state to restore later
+            const originalClasses = visualCanvas.className;
+            const originalTransition = visualCanvas.style.transition;
+            const originalPageIndex = activePageIndex;
+            const originalEditorHtml = editor.innerHTML;
+            
+            // Strip styles that cause visual artifacts in html2canvas
+            visualCanvas.style.transition = 'none';
+            visualCanvas.classList.remove('rounded-lg', 'border', 'border-neutral-800', 'shadow-2xl');
+            
+            // Turn on the machine shake
+            mainApp.classList.add('animate-print-shake');
+
+            try {
+                for (let i = 0; i < pages.length; i++) {
+                    // Set up the slide content
+                    if (i === 0) {
+                        textView.classList.add('hidden');
+                        coverView.classList.remove('hidden');
+                    } else {
+                        coverView.classList.add('hidden');
+                        textView.classList.remove('hidden');
+                        editor.innerHTML = pages[i] || '';
+                    }
+
+                    // Create and append the physical print head scanner
+                    const scanner = document.createElement('div');
+                    scanner.className = 'print-scanner';
+                    visualCanvas.appendChild(scanner);
+
+                    // Wait for the scanner to sweep down the page
+                    await new Promise(resolve => setTimeout(resolve, 800)); 
+                    
+                    // Briefly pause machine shake for a crystal clear HD photo
+                    mainApp.classList.remove('animate-print-shake');
+                    visualCanvas.removeChild(scanner);
+
+                    // Capture exactly what is rendered on screen
+                    const canvas = await html2canvas(visualCanvas, { 
+                        scale: renderScale, 
+                        useCORS: true, 
+                        backgroundColor: theme === 'light' ? '#ffffff' : '#121212'
+                    });
+                    
+                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                    zip.file(`${String(i + 1).padStart(2, '0')}_slide.png`, blob);
+                    
+                    // Resume machine shake for the next page
+                    if(i < pages.length - 1) {
+                        mainApp.classList.add('animate-print-shake');
+                    }
+                }
+
+                // Compile and Download ZIP
+                const zipContent = await zip.generateAsync({ type: 'blob' });
+                const link = document.createElement('a'); 
+                link.href = URL.createObjectURL(zipContent);
+                link.download = 'Wifey_Story.zip'; 
+                link.click();
+                showToast('Printing complete. Files downloaded.');
+            } catch (error) {
+                console.error("Export failed:", error); 
+                showToast('Machine jammed. See console for details.');
+            } finally {
+                // Shut down the machine and restore UI
+                mainApp.classList.remove('animate-print-shake');
+                visualCanvas.className = originalClasses;
+                visualCanvas.style.transition = originalTransition;
+                
+                if (originalPageIndex === 0) {
+                    textView.classList.add('hidden');
+                    coverView.classList.remove('hidden');
+                } else {
+                    coverView.classList.add('hidden');
+                    textView.classList.remove('hidden');
+                }
+                editor.innerHTML = originalEditorHtml;
+                
+                btnExport.disabled = false; 
+                btnExport.classList.remove('opacity-50');
+            }
+        }
     </script>
 </body>
 </html>

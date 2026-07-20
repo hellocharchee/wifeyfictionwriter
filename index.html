@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wifey</title>
+    <title>Wifey - Meaning Making Machine</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -500,7 +500,7 @@
             "https://i.imgur.com/vVvgPrF.jpeg", "https://i.imgur.com/n0NU3wp.jpeg"
         ];
 
-        /* --- STREAMING_CHUNK:Core Setup and Utility Functions... --- */
+        /* --- STREAMING_CHUNK:Configuring utility functions and boot sequence... --- */
         // Global UI Notification System
         function showToast(msg) {
             toastMsg.textContent = msg;
@@ -544,7 +544,7 @@
         function applyFont(fontName) { applyCommand('fontName', fontName); fontMenu.classList.add('hidden'); }
         function applySize(size) { applyCommand('fontSize', size); }
 
-        /* --- STREAMING_CHUNK:Editor Logic & Overflow Protections... --- */
+        /* --- STREAMING_CHUNK:Configuring strict editor bounds and pasting logic... --- */
         // Smart Paste: Limits text gracefully to avoid layout destruction
         editor.addEventListener('paste', (e) => {
             e.preventDefault();
@@ -631,7 +631,7 @@
             if (!fontMenuBtn.contains(e.target) && !fontMenu.contains(e.target)) fontMenu.classList.add('hidden');
         });
 
-        /* --- STREAMING_CHUNK:Slide Navigation and UI Updates... --- */
+        /* --- STREAMING_CHUNK:Configuring slide navigation and UI updates... --- */
         btnPrev.addEventListener('click', () => { if (activePageIndex > 0) { activePageIndex--; updateUI(); }});
         btnNext.addEventListener('click', () => { if (activePageIndex < pages.length - 1) { activePageIndex++; updateUI(); }});
         
@@ -699,7 +699,7 @@
             charCountDisplay.className = textLen >= MAX_CHARS ? 'font-bold text-red-400 transition-colors' : 'font-bold text-neutral-200 transition-colors';
         }
 
-        /* --- STREAMING_CHUNK:Environment & Background Controls... --- */
+        /* --- STREAMING_CHUNK:Configuring immersive background controls... --- */
         // Places Logic
         function setRandomPlace() {
             if (placesImages.length === 0) return;
@@ -818,7 +818,7 @@
             }
         });
 
-        /* --- STREAMING_CHUNK:Dictionary API Integration... --- */
+        /* --- STREAMING_CHUNK:Configuring the dictionary API... --- */
         btnDictionary.addEventListener('click', () => { dictionaryPanel.classList.remove('translate-x-full'); setTimeout(() => dictSearchInput.focus(), 100); });
         btnCloseDict.addEventListener('click', () => { dictionaryPanel.classList.add('translate-x-full'); });
 
@@ -853,7 +853,7 @@
             }
         }
 
-        /* --- STREAMING_CHUNK:Printing Press Export Sequence... --- */
+        /* --- STREAMING_CHUNK:Configuring Printing Press logic and exporting... --- */
         let isDraggingLever = false;
         let leverStartY = 0;
         let leverCurrentY = 0;

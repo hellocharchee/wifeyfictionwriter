@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wifey - Meaning Making Machine</title>
+    <title>Meaning Making Machine</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -65,6 +65,31 @@
         @keyframes driftLeft {
             0% { transform: translateX(120vw); }
             100% { transform: translateX(-120%); }
+        }
+
+        /* --- STACK ENGINE ANIMATIONS --- */
+        @keyframes tossRight {
+            0% { transform: translateX(0) rotate(var(--rot)) scale(1); opacity: 1; }
+            100% { transform: translateX(150vw) rotate(45deg) scale(0.9); opacity: 0; }
+        }
+        .animate-toss {
+            animation: tossRight 0.6s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .stack-page {
+            position: absolute;
+            inset: 0;
+            border-radius: 0.5rem; 
+            transition: background-color 0.5s ease, border-color 0.5s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            pointer-events: none; /* Let clicks pass through */
+        }
+        .stack-page.light-theme {
+            background-color: #f4f0e6;
+            border: 1px solid #d6d3c4;
+        }
+        .stack-page.dark-theme {
+            background-color: #1a1a19;
+            border: 1px solid #333333;
         }
 
         /* --- Animation Utilities --- */
@@ -148,7 +173,7 @@
         .inset-inner-shadow { box-shadow: inset 0 10px 20px rgba(0,0,0,0.8); }
     </style>
 </head>
-<body class="bg-neutral-950 text-white font-sans w-full h-screen flex flex-col overflow-hidden relative">
+<body class="bg-neutral-950 text-white font-sans w-full h-screen flex flex-col overflow-hidden relative overflow-x-hidden">
 
     <!-- PLACES MODE BACKGROUND -->
     <div id="places-bg-container" class="fixed inset-0 z-0 opacity-0 pointer-events-none transition-opacity duration-1000">
@@ -217,11 +242,11 @@
             </button>
         </div>
 
-        <div class="absolute bottom-4 text-[#8a4e2d]/60 text-xs font-mono tracking-widest z-10 pointer-events-none select-none">Meaning Making Machine v1.7</div>
+        <div class="absolute bottom-4 text-[#8a4e2d]/60 text-xs font-mono tracking-widest z-10 pointer-events-none select-none">Meaning Making Machine V2.0</div>
     </div>
 
     <!-- MAIN APP WRAPPER -->
-    <div id="main-app" class="hidden flex-col h-full w-full relative z-10 transition-transform">
+    <div id="main-app" class="hidden flex-col h-full w-full relative z-10 transition-transform overflow-x-hidden">
         
         <!-- Header -->
         <header class="flex items-center justify-between p-4 bg-neutral-900/80 backdrop-blur-md border-b border-neutral-800 shrink-0 z-20 transition-colors duration-500" id="main-header">
@@ -278,7 +303,7 @@
             </div>
         </header>
 
-        <main class="flex-1 flex flex-col items-center py-6 px-4 gap-6 overflow-y-auto relative z-10">
+        <main class="flex-1 flex flex-col items-center py-6 px-4 gap-6 overflow-y-auto overflow-x-hidden relative z-10">
             <!-- Floating Toolbar -->
             <div id="toolbar" class="hidden flex-wrap items-center justify-center gap-1 p-2 bg-neutral-900/95 backdrop-blur border border-neutral-700 rounded-xl shadow-2xl sticky top-2 z-30 transition-all duration-500 max-w-full">
                 <div class="relative">
@@ -320,7 +345,12 @@
 
             <!-- Canvas Area (4:5 Aspect Ratio for IG) -->
             <div class="relative w-full max-w-[400px] flex-shrink-0 group z-10 mt-2">
-                <div id="canvas-container" class="w-full aspect-[4/5] rounded-lg overflow-hidden flex flex-col transition-all duration-700 bg-[#121212] text-white shadow-2xl relative border border-neutral-800">
+                
+                <!-- STACK CONTAINER (The magic happens here) -->
+                <div id="stack-container" class="absolute inset-0 z-0 pointer-events-none"></div>
+
+                <!-- MAIN CANVAS -->
+                <div id="canvas-container" class="w-full aspect-[4/5] rounded-lg overflow-hidden flex flex-col transition-all duration-700 bg-[#1a1a19] text-[#f4f0e6] shadow-2xl relative border border-neutral-800 z-10">
                     
                     <div id="cover-view" class="w-full h-full flex flex-col items-center justify-center relative bg-neutral-900/80">
                         <img id="cover-image-preview" src="" alt="Cover" class="hidden w-full h-full object-cover">
@@ -344,9 +374,9 @@
         </main>
 
         <footer class="bg-neutral-900/80 backdrop-blur-md border-t border-neutral-800 p-4 shrink-0 flex flex-col items-center gap-4 z-20 transition-colors duration-500" id="main-footer">
-            <div class="flex flex-col md:flex-row items-center gap-6">
+            <div class="flex flex-col md:flex-row items-center justify-between w-full max-w-5xl px-2">
                 
-                <div class="text-xs text-neutral-400 flex flex-col items-center md:items-end w-64">
+                <div class="text-xs text-neutral-400 flex flex-col items-center md:items-start w-64">
                     <!-- 1200 CHAR LIMIT VISUAL -->
                     <span id="char-count" class="font-bold text-neutral-200 transition-colors">0 / 1200 Chars</span>
                     <span class="opacity-70 text-blue-400 font-medium">Current Slide Capacity</span>
@@ -370,12 +400,12 @@
                     </button>
                 </div>
 
-                <div class="w-64 flex items-center justify-between">
+                <div class="w-64 flex flex-col items-center md:items-end justify-center gap-1">
                     <button id="btn-delete" class="text-xs flex items-center gap-1 text-neutral-500 hover:text-red-400 transition-colors">
                         <i class="ph ph-trash text-sm"></i> <span id="delete-text">Remove Cover</span>
                     </button>
                     <!-- VERSION STAMP -->
-                    <span class="text-[10px] text-neutral-600 font-mono select-none text-right" title="Current Build Version">Meaning Making Machine v1.7</span>
+                    <span class="text-[10px] text-neutral-600 font-mono select-none text-right" title="Current Build Version">Meaning Making Machine V2.0</span>
                 </div>
             </div>
         </footer>
@@ -413,9 +443,13 @@
         let pages = ['', '']; 
         let activePageIndex = 0;
         let coverImage = null;
-        let theme = 'dark';
+        let theme = 'dark'; // dark = Charcoal, light = Parchment
         let placesModeActive = false;
         let isReverting = false;
+
+        /* --- STACK ENGINE VARIABLES --- */
+        let stackData = []; 
+        const stackContainer = document.getElementById('stack-container');
 
         /* --- DOM ELEMENTS --- */
         const splashScreen = document.getElementById('splash-screen');
@@ -544,6 +578,42 @@
         function applyFont(fontName) { applyCommand('fontName', fontName); fontMenu.classList.add('hidden'); }
         function applySize(size) { applyCommand('fontSize', size); }
 
+        /* --- STREAMING_CHUNK:Configuring Stack Engine physics... --- */
+        // Syncs the DOM pages beneath the canvas to the current slide number
+        function syncStack(targetPageCount) {
+            // Add pages if we are moving forward
+            while (stackData.length < targetPageCount) {
+                // Generate slightly messy random rotations and offsets
+                const rot = (Math.random() * 3 - 1.5).toFixed(2); 
+                const x = (Math.random() * 4 - 2).toFixed(2); 
+                const y = (Math.random() * 4 - 2).toFixed(2); 
+                stackData.push({ rot, x, y });
+                
+                const el = document.createElement('div');
+                el.className = `stack-page ${theme === 'light' ? 'light-theme' : 'dark-theme'}`;
+                el.style.setProperty('--rot', `${rot}deg`);
+                el.style.transform = `translate(${x}px, ${y}px) rotate(${rot}deg)`;
+                el.style.zIndex = stackData.length - 1; 
+                stackContainer.appendChild(el);
+            }
+            
+            // Remove pages if we are moving backward (Toss Animation)
+            let delay = 0;
+            while (stackData.length > targetPageCount) {
+                stackData.pop();
+                const el = stackContainer.children[stackData.length]; // Get top page
+                if (el) {
+                    setTimeout(() => {
+                        el.classList.add('animate-toss');
+                        setTimeout(() => {
+                            if (el.parentNode === stackContainer) stackContainer.removeChild(el);
+                        }, 650); // Clean up after animation finishes
+                    }, delay);
+                    delay += 100; // Stagger if multiple are tossing
+                }
+            }
+        }
+
         /* --- STREAMING_CHUNK:Configuring strict editor bounds and pasting logic... --- */
         // Smart Paste: Limits text gracefully to avoid layout destruction
         editor.addEventListener('paste', (e) => {
@@ -665,14 +735,29 @@
             }
         });
 
-        // Canvas Theme Toggle
+        // Canvas Theme Toggle (Charcoal / Parchment)
         btnTheme.addEventListener('click', () => {
             theme = theme === 'dark' ? 'light' : 'dark';
+            
+            // Update Main Canvas
             if (theme === 'light') {
-                canvasContainer.classList.remove('bg-[#121212]', 'text-white'); canvasContainer.classList.add('bg-white', 'text-black');
+                canvasContainer.classList.remove('bg-[#1a1a19]', 'text-[#f4f0e6]'); 
+                canvasContainer.classList.add('bg-[#f4f0e6]', 'text-[#1a1a19]');
             } else {
-                canvasContainer.classList.remove('bg-white', 'text-black'); canvasContainer.classList.add('bg-[#121212]', 'text-white');
+                canvasContainer.classList.remove('bg-[#f4f0e6]', 'text-[#1a1a19]'); 
+                canvasContainer.classList.add('bg-[#1a1a19]', 'text-[#f4f0e6]');
             }
+
+            // Update Physical Stack Pages
+            document.querySelectorAll('.stack-page').forEach(el => {
+                if (theme === 'light') {
+                    el.classList.remove('dark-theme');
+                    el.classList.add('light-theme');
+                } else {
+                    el.classList.remove('light-theme');
+                    el.classList.add('dark-theme');
+                }
+            });
         });
 
         // Master UI Sync
@@ -689,6 +774,10 @@
                 editor.innerHTML = pages[activePageIndex] || ''; deleteText.textContent = 'Clear Slide';
                 updateCharCount();
             }
+            
+            // Trigger the Stack Physics Engine to build or toss pages
+            syncStack(activePageIndex);
+
             btnPrev.disabled = activePageIndex === 0; btnNext.disabled = activePageIndex === pages.length - 1; btnAdd.disabled = pages.length >= MAX_PAGES;
         }
 
@@ -929,7 +1018,6 @@
             const originalClasses = visualCanvas.className;
             const originalTransition = visualCanvas.style.transition;
             const originalPageIndex = activePageIndex;
-            const originalEditorHtml = editor.innerHTML;
             
             // Strip styles that cause visual artifacts in html2canvas
             visualCanvas.style.transition = 'none';
@@ -939,16 +1027,17 @@
             mainApp.classList.add('animate-print-shake');
 
             try {
+                // Toss entire stack first to prepare for printing loop
+                syncStack(0);
+                await new Promise(resolve => setTimeout(resolve, 700));
+
                 for (let i = 0; i < pages.length; i++) {
-                    // Set up the slide content
-                    if (i === 0) {
-                        textView.classList.add('hidden');
-                        coverView.classList.remove('hidden');
-                    } else {
-                        coverView.classList.add('hidden');
-                        textView.classList.remove('hidden');
-                        editor.innerHTML = pages[i] || '';
-                    }
+                    // Update state to step through the stack physically
+                    activePageIndex = i;
+                    updateUI(); // This auto-builds the stack behind as we scan!
+                    
+                    // Wait for the stack building animation 
+                    await new Promise(resolve => setTimeout(resolve, 400)); 
 
                     // Create and append the physical print head scanner
                     const scanner = document.createElement('div');
@@ -966,7 +1055,7 @@
                     const canvas = await html2canvas(visualCanvas, { 
                         scale: renderScale, 
                         useCORS: true, 
-                        backgroundColor: theme === 'light' ? '#ffffff' : '#121212'
+                        backgroundColor: theme === 'light' ? '#f4f0e6' : '#1a1a19'
                     });
                     
                     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
@@ -982,7 +1071,7 @@
                 const zipContent = await zip.generateAsync({ type: 'blob' });
                 const link = document.createElement('a'); 
                 link.href = URL.createObjectURL(zipContent);
-                link.download = 'Wifey_Story.zip'; 
+                link.download = 'Meaning_Making_Machine_Export.zip'; 
                 link.click();
                 showToast('Printing complete. Files downloaded.');
             } catch (error) {
@@ -994,14 +1083,8 @@
                 visualCanvas.className = originalClasses;
                 visualCanvas.style.transition = originalTransition;
                 
-                if (originalPageIndex === 0) {
-                    textView.classList.add('hidden');
-                    coverView.classList.remove('hidden');
-                } else {
-                    coverView.classList.add('hidden');
-                    textView.classList.remove('hidden');
-                }
-                editor.innerHTML = originalEditorHtml;
+                activePageIndex = originalPageIndex;
+                updateUI();
                 
                 btnExport.disabled = false; 
                 btnExport.classList.remove('opacity-50');
